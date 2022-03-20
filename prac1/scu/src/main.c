@@ -1,9 +1,9 @@
 /* main.c - Application main entry point */
 
 /*
- * Copyright (c) 2015-2016 Intel Corporation
+ * 
  *
- * SPDX-License-Identifier: Apache-2.0
+ * 
  */
 
 #include <zephyr/types.h>
@@ -23,6 +23,8 @@
 #include <bluetooth/gatt.h>
 #include <bluetooth/services/bas.h>
 #include <bluetooth/services/hrs.h>
+
+#include <drivers/sensor.h>
 
 //#include "cts.h"
 
@@ -300,11 +302,67 @@ static struct bt_conn_auth_cb auth_cb_display = {
 	.cancel = auth_cancel,
 };
 
+//Sensor stuff
+/*
+
+ * Get a device structure from a devicetree node with compatible
+
+ * "bosch,bme280". (If there are multiple, just pick one.)
+
+ */
+
+static const struct device *get_hts221_device(void)
+
+{
+
+	const struct device *dev = DEVICE_DT_GET_ANY(st_hts221); //bosch_bme280
+
+
+	if (dev == NULL) {
+
+		/* No such node, or the node does not have status "okay". */
+
+		printk("\nError: no device found.\n");
+
+		return NULL;
+
+	}
+
+
+	if (!device_is_ready(dev)) {
+
+		printk("\nError: Device \"%s\" is not ready; "
+
+		       "check the driver initialization logs for errors.\n",
+
+		       dev->name);
+
+		return NULL;
+
+	}
+
+
+	printk("Found device \"%s\", getting sensor data\n", dev->name);
+
+	return dev;
+
+}
+
 void main(void)
 {
 	struct bt_gatt_attr *vnd_ind_attr; //indication
 	char str[BT_UUID_STR_LEN]; //gets used in abcdef1
 	int err;
+
+	//sensor stuff
+	const struct device *dev = get_hts221_device();
+
+	
+	if (dev == NULL) {
+
+		return;
+
+	}
 
 	err = bt_enable(NULL);
 	if (err) {
@@ -312,7 +370,7 @@ void main(void)
 		return;
 	}
 
-	bt_set_name("JM CSERVUP");
+	bt_set_name("JM TEMP");
 
 	bt_ready();
 
@@ -332,6 +390,17 @@ void main(void)
 		k_sleep(K_SECONDS(1));
 
 		signed_value = (signed_value + 1) % 20;
+
+		struct sensor_value temp, humidity; //press,
+
+
+		sensor_sample_fetch(dev);
+
+		sensor_channel_get(dev, SENSOR_CHAN_AMBIENT_TEMP, &temp);
+
+		sensor_channel_get(dev, SENSOR_CHAN_HUMIDITY, &humidity);
+
+		signed_value = humidity.val1;
 
 		/* Current Time Service updates only when time is changed */
 		//cts_notify(); //disable cts?
