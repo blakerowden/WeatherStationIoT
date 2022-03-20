@@ -28,6 +28,8 @@
 
 //#include "cts.h"
 
+#include "sens.h"
+
 /* Custom Service Variables */
 #define BT_UUID_CUSTOM_SERVICE_VAL \
 	BT_UUID_128_ENCODE(0x12345678, 0x1234, 0x5678, 0x1234, 0x56789abcdef0) //Custom service UUID
@@ -311,6 +313,7 @@ static struct bt_conn_auth_cb auth_cb_display = {
 
  */
 
+/*
 static const struct device *get_hts221_device(void)
 
 {
@@ -320,7 +323,7 @@ static const struct device *get_hts221_device(void)
 
 	if (dev == NULL) {
 
-		/* No such node, or the node does not have status "okay". */
+		//No such node, or the node does not have status "okay". 
 
 		printk("\nError: no device found.\n");
 
@@ -347,6 +350,7 @@ static const struct device *get_hts221_device(void)
 	return dev;
 
 }
+*/
 
 void main(void)
 {
@@ -355,6 +359,7 @@ void main(void)
 	int err;
 
 	//sensor stuff
+	/*
 	const struct device *dev = get_hts221_device();
 
 	
@@ -363,6 +368,8 @@ void main(void)
 		return;
 
 	}
+	*/
+	const struct device *dev = scu_sensors_init();
 
 	err = bt_enable(NULL);
 	if (err) {
@@ -370,7 +377,7 @@ void main(void)
 		return;
 	}
 
-	bt_set_name("JM TEMP");
+	bt_set_name("JM TEMP LIB2");
 
 	bt_ready();
 
@@ -391,6 +398,7 @@ void main(void)
 
 		signed_value = (signed_value + 1) % 20;
 
+		/*
 		struct sensor_value temp, humidity; //press,
 
 
@@ -401,6 +409,11 @@ void main(void)
 		sensor_channel_get(dev, SENSOR_CHAN_HUMIDITY, &humidity);
 
 		signed_value = humidity.val1;
+		*/
+		//scu_sensors_scan();
+		//signed_value = scu_sensors_get_temp();
+		scu_sensors_scan(dev);
+		signed_value = scu_sensors_get_temp();
 
 		/* Current Time Service updates only when time is changed */
 		//cts_notify(); //disable cts?
