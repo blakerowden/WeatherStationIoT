@@ -2,9 +2,9 @@
 ## Blake Rowden s4427634
 ---
 ### Brief Description of Functionality achieved for each Design Task.
-> Task 1
+> Task 1: LED
 
-> Task 2
+> Task 2: Timer
 ---
 ### Folder Structure
 ```
@@ -37,6 +37,8 @@
 ---
 >List any References used
 
->Any instructions regarding your source
-
->Any user instructions
+### Instructions
+All building tasks can be done using the shell script `./autobuild.sh -b -p -r`
+`-b` Will build the AHU
+`-p` Will package and flash the AHU for the USB dongle
+`-r` Will open the AHU CLI 
