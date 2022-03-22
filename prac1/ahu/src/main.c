@@ -24,6 +24,16 @@
 #include "shell_led.h"
 #include "ble_base.h"
 
+
+// Debug Define Fkags ==========================================================
+#define DEBUG_BLE 0x01
+#define DEBUG_SHELL 0x02
+#define DEBUG_LED 0x04
+#define DEBUG_ALL 0xFF
+
+// Set the flags for debugging
+#define DEBUG_LEVEL (DEBUG_BLE | DEBUG_SHELL | DEBUG_LED)
+
 // Logging Module
  LOG_MODULE_REGISTER(main);
 
@@ -42,11 +52,14 @@ void main(void) {
 
 //START BLE BASE entry thread : Delayed Start (Wait for USB to be ready)
 K_THREAD_DEFINE(ble_base, THREAD_BLE_BASE_STACK, thread_ble_base, NULL, NULL, NULL, THREAD_PRIORITY_BLE_BASE, 0, 0);
+#if (DEBUG_LEVEL & DEBUG_SHELL)
 //Reads BLE Buffers and prints them to USB Console
 K_THREAD_DEFINE(ble_read_out, THREAD_BLE_BASE_STACK, thread_ble_read_out, NULL, NULL, NULL, THREAD_PRIORITY_READ_BASE, 0, 0);
+#endif
 //Start BLE LED Thread
+#if (DEBUG_LEVEL & DEBUG_BLE)
 K_THREAD_DEFINE(ble_led, THREAD_BLE_LED_STACK, thread_ble_led, NULL, NULL, NULL, THREAD_PRIORITY_BLE_LED, 0, 0);
-
+#endif
 // Shell Commands ==============================================================
 
 // Level 1 //
