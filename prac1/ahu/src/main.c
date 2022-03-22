@@ -2,7 +2,7 @@
  * @file main.c
  * @author Blake Rowden (b.rowden@uqconnect.edu.au) - s4427634
  * @brief Weather Station - Application Host Unit
- * @version 0.1
+ * @version 0.2
  * @date 2022-03-15
  * 
  * @copyright Copyright (c) 2022
@@ -25,7 +25,7 @@
 #include "ble_base.h"
 
 
-// Debug Define Fkags ==========================================================
+// Debug Define Flags ==========================================================
 #define DEBUG_BLE 0x01
 #define DEBUG_SHELL 0x02
 #define DEBUG_LED 0x04
@@ -35,16 +35,23 @@
 #define DEBUG_LEVEL (DEBUG_BLE | DEBUG_SHELL | DEBUG_LED)
 
 // Logging Module
- LOG_MODULE_REGISTER(main);
+LOG_MODULE_REGISTER(main);
 
 /**
  * @brief Initialises the hardware and shell
  * 
  */
+void initialise(void) {   
+
+    init_leds();
+    begin_shell();
+    
+}
+
+
 void main(void) {
 
-	init_leds();
-	begin_shell();
+    initialise();
     
 }
 
@@ -71,6 +78,9 @@ SHELL_STATIC_SUBCMD_SET_CREATE(time_read,
 // Level 0 //
 SHELL_CMD_REGISTER(time, &time_read, "Display elapsed time since power on", cmd_disp_time);
 SHELL_CMD_REGISTER(led, NULL, "Control the AHUs LEDs", cmd_led_control);
+// SCU Command Interface
+SHELL_CMD_REGISTER(hts221, NULL, "Temp/Humidity", cmd_led_control);
+SHELL_CMD_REGISTER(lps22, NULL, "Pressure", cmd_led_control);
 
 
 

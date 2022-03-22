@@ -1,12 +1,13 @@
 /**
-  ******************************************************************************
-  * @file   : ble_base.c
-  * @brief  : 
-  ******************************************************************************
-  * @author Blake Rowden
-  * ***************************************************************************
-  */
-
+ * @file ble_base.c
+ * @author Blake Rowden (b.rowden@uqconnect.edu.au)
+ * @brief 
+ * @version 0.1
+ * @date 2022-03-23
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 #include <zephyr/types.h>
 #include <stddef.h>
 #include <errno.h>
@@ -28,16 +29,18 @@
 #include "ble_uuid.h"
 
 void thread_ble_base(void);
-
-//TODO BUG: Opening cosole instantly locks on bluetooth connect, otherwise takes a bit longer (~12s backend priority issue with USB and Console). Caused by (CONFIG_USB_UART_CONSOLE)
 static void start_scan(void);
 
 static struct bt_conn *default_conn;
 bool ble_connected;
 
-//RSSI RX BUFFER
+//RX BUFFER
 int16_t rx_buff[] = {
-    0x00, 0x00, 0x00, 0x00, 
+    0x00, 0x00, 0x00, 0x00
+};
+
+//RX BUFFER
+int16_t tx_buff[] = {
     0x00, 0x00, 0x00, 0x00
 };
 
@@ -253,7 +256,6 @@ void thread_ble_read_out(void)
     while (1)
     {
 
-	/* NOTE: The commented out code implements additional features that were deprecated by the spec */
         if (ble_connected)
         {
             timeStamp = k_cyc_to_ms_floor64(k_cycle_get_32());
@@ -261,7 +263,7 @@ void thread_ble_read_out(void)
             bt_gatt_read(default_conn, &read_params_rx);
             
             printk("%x,%x,%x,%x,%x \n", rx_buff[0], rx_buff[1], rx_buff[2], rx_buff[3], rx_buff[4]);
-            
+
         }
 
         k_usleep(100);
@@ -323,5 +325,4 @@ void thread_ble_led(void)
             k_msleep(BLE_DISC_SLEEP_MS);
         }
     }
-    //Still very important...
 }
