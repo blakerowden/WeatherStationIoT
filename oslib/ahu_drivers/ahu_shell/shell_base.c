@@ -35,7 +35,7 @@ int begin_shell(void) {
     printk("\n=======================================\n");
     printk("Welcome to the Weather Station Terminal\n");
     printk("=======================================\n");
-    printk("\nPress TAB to see available commands\n");
+    printk("\n--Press TAB to see available commands--\n\n");
     return 0;
 
 }

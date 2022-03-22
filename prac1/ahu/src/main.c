@@ -18,10 +18,11 @@
 #include <devicetree.h>
 #include <logging/log.h>
 
+#include "led_driver.h"
 #include "shell_base.h"
 #include "shell_time.h"
 #include "shell_led.h"
-#include "led_driver.h"
+#include "ble_base.h"
 
 // Logging Module
 
@@ -41,6 +42,13 @@ void main(void) {
 }
 
 // Thread Defines ==============================================================
+
+//START BLE BASE entry thread : Delayed Start (Wait for USB to be ready)
+K_THREAD_DEFINE(ble_base, THREAD_BLE_BASE_STACK, thread_ble_base, NULL, NULL, NULL, THREAD_PRIORITY_BLE_BASE, 0, 0);
+//Reads BLE Buffers and prints them to USB Console
+K_THREAD_DEFINE(ble_read_out, THREAD_BLE_BASE_STACK, thread_ble_read_out, NULL, NULL, NULL, THREAD_PRIORITY_READ_BASE, 0, 0);
+//Start BLE LED Thread
+K_THREAD_DEFINE(ble_led, THREAD_BLE_LED_STACK, thread_ble_led, NULL, NULL, NULL, THREAD_PRIORITY_BLE_LED, 0, 0);
 
 // Shell Commands ==============================================================
 
