@@ -188,4 +188,10 @@ int led2_toggle(void);
 
 int led2_deinit(void);
 
+/**
+ * @brief Used to log an invalid LED command
+ * 
+ */
+void no_command(void);
+
 #endif //LED_DRIVER_H

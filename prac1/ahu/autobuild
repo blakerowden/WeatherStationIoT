@@ -20,12 +20,12 @@ fi
 if [[ ( $1 == "-b" ) ]]
 then
    echo "Building the project"
-   cd $(dirname $0)/ahu
+   cd $(dirname $0)
    west build -p auto -b nrf52840dongle_nrf52840
 elif [[ ( $1 == "-p" ) ]]
 then
    echo "Packaging and flashing the project"
-   cd $(dirname $0)/ahu
+   cd $(dirname $0)
    nrfutil pkg generate --hw-version 52 --sd-req=0x00 \
             --application build/zephyr/zephyr.hex \
             --application-version 1 ahu.zip
@@ -43,12 +43,12 @@ fi
 if [[ ( $2 == "-b" ) ]]
 then
    echo "Building the project"
-   cd $(dirname $0)/ahu
+   cd $(dirname $0)
    west build -p auto -b nrf52840dongle_nrf52840
 elif [[ ( $2 == "-p" ) ]]
 then
    echo "Packaging and flashing the project"
-   cd $(dirname $0)/ahu
+   cd $(dirname $0)
    nrfutil pkg generate --hw-version 52 --sd-req=0x00 \
             --application build/zephyr/zephyr.hex \
             --application-version 1 ahu.zip
@@ -69,12 +69,12 @@ fi
 if [[ ( $3 == "-b" ) ]]
 then
    echo "Building the project"
-   cd $(dirname $0)/ahu
+   cd $(dirname $0)
    west build -p auto -b nrf52840dongle_nrf52840
 elif [[ ( $3 == "-p" ) ]]
 then
     echo "Packaging and flashing the project"
-    cd $(dirname $0)/ahu
+    cd $(dirname $0)
     nrfutil pkg generate --hw-version 52 --sd-req=0x00 \
             --application build/zephyr/zephyr.hex \
             --application-version 1 ahu.zip

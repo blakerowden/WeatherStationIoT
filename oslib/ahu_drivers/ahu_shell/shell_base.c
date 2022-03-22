@@ -9,10 +9,7 @@
  * 
  */
 
-#include <zephyr.h>
-#include <device.h>
-#include <devicetree.h>
-#include "ahu_shell.h"
+#include "shell_base.h"
 
 #define NO_USB -1
 

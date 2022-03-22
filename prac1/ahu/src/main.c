@@ -16,7 +16,7 @@
 #include <devicetree.h>
 #include <logging/log.h>
 
-#include "ahu_shell.h"
+#include "shell_base.h"
 #include "led_driver.h"
 
 // Private Defines =============================================================
