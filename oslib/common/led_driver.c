@@ -326,3 +326,11 @@ void no_command(void) {
     LOG_ERR("invalid command");
 
 }
+
+void init_leds(void) {
+
+    led0_init();
+    led1_init();
+    led2_init();
+    
+}

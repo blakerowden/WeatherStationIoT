@@ -18,4 +18,7 @@
 #ifndef SHELL_TIME_H
 #define SHELL_TIME_H
 
+int cmd_disp_time(const struct shell *, size_t, char **);
+int cmd_disp_format_time(const struct shell *, size_t, char **);
+
 #endif //SHELL_TIME_H

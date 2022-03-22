@@ -194,4 +194,10 @@ int led2_deinit(void);
  */
 void no_command(void);
 
+/**
+ * @brief Initialises all LEDs to be used as outputs
+ * 
+ */
+void init_leds(void);
+
 #endif //LED_DRIVER_H

@@ -17,6 +17,8 @@ int begin_shell(void) {
     const struct device *shell_dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_shell_uart));
     uint32_t dtr = 0;
 
+    
+
     /* Enable the USB Driver */
     if (usb_enable(NULL))   
         return NO_USB;
@@ -33,10 +35,7 @@ int begin_shell(void) {
     printk("\n=======================================\n");
     printk("Welcome to the Weather Station Terminal\n");
     printk("=======================================\n");
-    printk("\nLED Control      Status: FUNCTIONAL\n");
-    printk("Time Display     Status: FUNCTIONAL\n");
-    printk("Bluetooth        Status: IN DEVELOPMENT\n");
-    printk("Sensor Control   Status: NOT STARTED\n\n");
+    printk("\nPress TAB to see available commands\n");
     return 0;
 
 }

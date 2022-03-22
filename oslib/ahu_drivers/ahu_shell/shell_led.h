@@ -18,4 +18,6 @@
 #ifndef SHELL_LED_H
 #define SHELL_LED_H
 
+int cmd_led_control(const struct shell *, size_t, char **);
+
 #endif //SHELL_LED_H
