@@ -25,9 +25,7 @@
 
 #include "ble_base.h"
 #include "led_driver.h"
-
-//#define BT_ATT_FIRST_ATTRIBUTE_HANDLE 0x0001
-//#define BT_ATT_LAST_ATTRIBUTE_HANDLE 0xffff
+#include "ble_uuid.h"
 
 void thread_ble_base(void);
 
@@ -37,47 +35,12 @@ static void start_scan(void);
 static struct bt_conn *default_conn;
 bool ble_connected;
 
-/* Custom UUIDs For Mobile and it's GATT Attributes */
-#define UUID_BUFFER_SIZE 16
-//Used to as a key to test against scanned UUIDs
-uint16_t mobile_uuid[] = {0xd0, 0x92, 0x67, 0x35, 0x78, 0x16, 0x21, 0x91,
-                          0x26, 0x49, 0x60, 0xeb, 0x06, 0xa7, 0xca, 0xcb};
-
-static struct bt_uuid_128 node_ultra_uuid = BT_UUID_INIT_128(
-    0xd1, 0x92, 0x67, 0x35, 0x78, 0x16, 0x21, 0x91,
-    0x26, 0x49, 0x60, 0xeb, 0x06, 0xa7, 0xca, 0xcb);
-
-static struct bt_uuid_128 node_rssi_uuid = BT_UUID_INIT_128(
-    0xd2, 0x92, 0x67, 0x35, 0x78, 0x16, 0x21, 0x91,
-    0x26, 0x49, 0x60, 0xeb, 0x06, 0xa7, 0xca, 0xcb);
-
-static struct bt_uuid_128 imu_accel_uuid = BT_UUID_INIT_128(
-    0xd3, 0x92, 0x67, 0x35, 0x78, 0x16, 0x21, 0x91,
-    0x26, 0x49, 0x60, 0xeb, 0x06, 0xa7, 0xca, 0xcb);
-
-static struct bt_uuid_128 imu_gyro_uuid = BT_UUID_INIT_128(
-    0xd4, 0x92, 0x67, 0x35, 0x78, 0x16, 0x21, 0x91,
-    0x26, 0x49, 0x60, 0xeb, 0x06, 0xa7, 0xca, 0xcb);
-
-static struct bt_uuid_128 imu_mag_uuid = BT_UUID_INIT_128(
-    0xd5, 0x92, 0x67, 0x35, 0x78, 0x16, 0x21, 0x91,
-    0x26, 0x49, 0x60, 0xeb, 0x06, 0xa7, 0xca, 0xcb);
-
 //RSSI RX BUFFER
-int16_t rx_rssi[] = {0x00, 0x00, 0x00, 0x00};
-//ULTRA RX BUFFER
-int16_t rx_ultra[] = {0x00, 0x00, 0x00, 0x00};
-//IMT Data Array
-int16_t rx_imu_accel_raw[] = {0x00, 0x00, 0x00};
-int16_t rx_imu_gyro_raw[] = {0x00, 0x00, 0x00};
-int16_t rx_imu_mag_raw[] = {0x00, 0x00, 0x00};
+int16_t rx_buff[] = {
+    0x00, 0x00, 0x00, 0x00, 
+    0x00, 0x00, 0x00, 0x00
+};
 
-//Accel Range/32767.5
-float accel_scale = 0.0002441;
-//Gyro DPS/32767.5
-float gyro_scale = 0.01397917;
-//These values were read from the calibration registers on the Mag.
-float mag_scale[3] = {0.176835, 0.177421, 0.170980};
 /**
  * @brief Callback for BLE scanning, checks weather the returned 
  *          UUID matches the custom UUID of the mobile device.
@@ -103,7 +66,7 @@ static bool parse_device(struct bt_data *data, void *user_data)
         for (i = 0; i < data->data_len; i++)
         {
             temp = data->data[i];
-            if (temp == mobile_uuid[i])
+            if (temp == ble_uuid[i])
             {
                 matchedCount++;
             }
@@ -195,72 +158,13 @@ static void start_scan(void)
  * @param length Len of Data
  * @return uint8_t retVal (custom)
  */
-uint8_t read_rssi_from_mobile(struct bt_conn *conn, uint8_t err,
+uint8_t read_from_scu(struct bt_conn *conn, uint8_t err,
                               struct bt_gatt_read_params *params,
                               const void *data, uint16_t length)
 {
-    memcpy(&rx_rssi, data, sizeof(rx_rssi));
+    memcpy(&rx_buff, data, sizeof(rx_buff));
     //printk("RSSI: N1:%d, N2:%d, N3:%d, N4:%d\n", rx_rssi[0], rx_rssi[1], rx_rssi[2], rx_rssi[3]);
     return 0;
-}
-
-/**
- * @brief Callback for when reading RSSI Gatt atrribute data
- *          from the mobile device. The data read is saved into    
- *          and internal rx buffer. 
- * 
- * @param conn ble connection handler
- * @param err  ble ATT error val
- * @param params Read params
- * @param data Data read from GATT attribute
- * @param length Len of Data
- * @return uint8_t retVal (custom)
- */
-uint8_t read_ultra_from_mobile(struct bt_conn *conn, uint8_t err,
-                               struct bt_gatt_read_params *params,
-                               const void *data, uint16_t length)
-{
-
-    memcpy(&rx_ultra, data, sizeof(rx_ultra));
-    //printk("ULTRA: N1:%d, N2:%d, N3:%d, N4:%d\n", rx_ultra[0], rx_ultra[1], rx_ultra[2], rx_ultra[3]);
-    return 0;
-}
-
-/**
- * @brief Callback for when reading IMU sensor data from mobile device, data read is saved
- *          into internal sensor rx buffer.
- * 
- * @param conn ble connection handler
- * @param err  ble ATT error val
- * @param params Read params
- * @param data Data read from GATT attribute
- * @param length Len of Data
- * @return uint8_t retVal (custom)
- */
-uint8_t read_sensor_array_from_mobile(struct bt_conn *conn, uint8_t err,
-                                      struct bt_gatt_read_params *params,
-                                      const void *data, uint16_t length)
-{
-
-    if (bt_uuid_cmp(params->by_uuid.uuid, &imu_accel_uuid.uuid) == 0)
-    {
-        memcpy(rx_imu_accel_raw, data, sizeof(rx_imu_accel_raw));
-        //printk("AX %f, AY %f, AZ %f\n", rx_imu_accel_raw[0] * accel_scale, rx_imu_accel_raw[1] * accel_scale, rx_imu_accel_raw[2] * accel_scale);
-    }
-
-    if (bt_uuid_cmp(params->by_uuid.uuid, &imu_gyro_uuid.uuid) == 0)
-    {
-        memcpy(rx_imu_gyro_raw, data, sizeof(rx_imu_accel_raw));
-        //printk("gX %f, gY %f, gZ %f\n", rx_imu_gyro_raw[0] * gyro_scale, rx_imu_gyro_raw[1] * gyro_scale, rx_imu_gyro_raw[2] * gyro_scale);
-    }
-
-    if (bt_uuid_cmp(params->by_uuid.uuid, &imu_mag_uuid.uuid) == 0)
-    {
-        memcpy(rx_imu_mag_raw, data, sizeof(rx_imu_accel_raw));
-        //printk("mX %f, mY %f, mZ %f\n", rx_imu_mag_raw[0] * mag_scale[0], rx_imu_mag_raw[1] * mag_scale[1], rx_imu_mag_raw[2] * mag_scale[2]);
-    }
-
-    return BT_GATT_ITER_STOP;
 }
 
 /**
@@ -336,48 +240,14 @@ static struct bt_conn_cb conn_callbacks = {
 
 void thread_ble_read_out(void)
 {
-    static struct bt_gatt_read_params read_params_rssi = {
-        .func = read_rssi_from_mobile,
+    static struct bt_gatt_read_params read_params_rx = {
+        .func = read_from_scu,
         .handle_count = 0,
-        .by_uuid.uuid = &node_rssi_uuid.uuid,
+        .by_uuid.uuid = &node_rx.uuid,
         .by_uuid.start_handle = BT_ATT_FIRST_ATTRIBUTE_HANDLE,
         .by_uuid.end_handle = BT_ATT_LAST_ATTRIBUTE_HANDLE,
     };
 
-    static struct bt_gatt_read_params read_param_ultra = {
-        .func = read_ultra_from_mobile,
-        .handle_count = 0,
-        .by_uuid.uuid = &node_ultra_uuid.uuid,
-        .by_uuid.start_handle = BT_ATT_FIRST_ATTRIBUTE_HANDLE,
-        .by_uuid.end_handle = BT_ATT_LAST_ATTRIBUTE_HANDLE,
-    };
-
-    static struct bt_gatt_read_params read_param_accel = {
-        .func = read_sensor_array_from_mobile,
-        .handle_count = 0,
-        .by_uuid.uuid = &imu_accel_uuid.uuid,
-        .by_uuid.start_handle = BT_ATT_FIRST_ATTRIBUTE_HANDLE,
-        .by_uuid.end_handle = BT_ATT_LAST_ATTRIBUTE_HANDLE,
-    };
-
-    static struct bt_gatt_read_params read_param_gyro = {
-        .func = read_sensor_array_from_mobile,
-        .handle_count = 0,
-        .by_uuid.uuid = &imu_gyro_uuid.uuid,
-        .by_uuid.start_handle = BT_ATT_FIRST_ATTRIBUTE_HANDLE,
-        .by_uuid.end_handle = BT_ATT_LAST_ATTRIBUTE_HANDLE,
-    };
-
-    /* Disabled following feature, due to spec scope reduction. Maybe re-enabled just to flex? */
-    /*
-    static struct bt_gatt_read_params read_param_mag = {
-         .func = read_sensor_array_from_mobile,
-         .handle_count = 0,
-         .by_uuid.uuid = &imu_mag_uuid.uuid,
-         .by_uuid.start_handle = BT_ATT_FIRST_ATTTRIBUTE_HANDLE,
-         .by_uuid.end_handle = BT_ATT_LAST_ATTTRIBUTE_HANDLE,
-     };
-     */
     int timeStamp = 0;
 
     while (1)
@@ -387,30 +257,11 @@ void thread_ble_read_out(void)
         if (ble_connected)
         {
             timeStamp = k_cyc_to_ms_floor64(k_cycle_get_32());
-            //Read Node RSSI data from mobile
-            bt_gatt_read(default_conn, &read_params_rssi);
-
-            //Read Node Ultra Values from mobile
-            bt_gatt_read(default_conn, &read_param_ultra);
-
-            //Read IMU Values from mobile
-            bt_gatt_read(default_conn, &read_param_accel);
-            bt_gatt_read(default_conn, &read_param_gyro);
-            // bt_gatt_read(default_conn, &read_param_mag);
-
-            //printk("Delay Time: %d\n", (int)k_cyc_to_ms_floor64(k_cycle_get_32()) - timeStamp);
-
-            // printk("RSSI: N1:%d, N2:%d, N3:%d, N4:%d\n", rx_rssi[0], rx_rssi[1], rx_rssi[2], rx_rssi[3]);
-            // printk("ULTRA: N1:%d, N2:%d, N3:%d, N4:%d\n", rx_ultra[0], rx_ultra[1], rx_ultra[2], rx_ultra[3]);
-
-            // printk("aX %f, aY %f, aZ %f\n", rx_imu_accel_raw[0] * accel_scale, rx_imu_accel_raw[1] * accel_scale, rx_imu_accel_raw[2] * accel_scale);
-            // printk("gX %f, gY %f, gZ %f\n", rx_imu_gyro_raw[0] * gyro_scale, rx_imu_gyro_raw[1] * gyro_scale, rx_imu_gyro_raw[2] * gyro_scale);
-            // printk("mX %f, mY %f, mZ %f\n", rx_imu_mag_raw[0] * mag_scale[0], rx_imu_mag_raw[1] * mag_scale[1], rx_imu_mag_raw[2] * mag_scale[2]);
-
-            printk("%d,%d,%d,%d,%d,", (int)k_cyc_to_ms_floor64(k_cycle_get_32()), rx_rssi[0], rx_rssi[1], rx_rssi[2], rx_rssi[3]);
-            printk("%d,%d,", rx_ultra[0], rx_ultra[1]);
-            printk("%d,%d,%d,", rx_imu_accel_raw[0], rx_imu_accel_raw[1], rx_imu_accel_raw[2]);
-            printk("%d,%d,%d\n", rx_imu_gyro_raw[0], rx_imu_gyro_raw[1], rx_imu_gyro_raw[2]);
+            //Read from the rx attribute
+            bt_gatt_read(default_conn, &read_params_rx);
+            
+            printk("%x,%x,%x,%x,%x \n", rx_buff[0], rx_buff[1], rx_buff[2], rx_buff[3], rx_buff[4]);
+            
         }
 
         k_usleep(100);
