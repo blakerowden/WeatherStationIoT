@@ -25,10 +25,7 @@
 #include "ble_base.h"
 
 // Logging Module
-
  LOG_MODULE_REGISTER(main);
-
-// Insertion Point
 
 /**
  * @brief Initialises the hardware and shell
@@ -54,7 +51,7 @@ K_THREAD_DEFINE(ble_led, THREAD_BLE_LED_STACK, thread_ble_led, NULL, NULL, NULL,
 
 // Level 1 //
 SHELL_STATIC_SUBCMD_SET_CREATE(time_read,
-        SHELL_CMD(f,   NULL, "Show the time formatted as hours, minutes, seconds..", cmd_disp_format_time),
+        SHELL_CMD(f, NULL, "Show the time formatted as hours, minutes, seconds..", cmd_disp_format_time),
         SHELL_SUBCMD_SET_END
 );
 

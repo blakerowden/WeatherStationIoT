@@ -26,8 +26,8 @@
 #include "ble_base.h"
 #include "led_driver.h"
 
-#define BT_ATT_FIRST_ATTRIBUTE_HANDLE 0x0001
-#define BT_ATT_LAST_ATTRIBUTE_HANDLE 0xffff
+//#define BT_ATT_FIRST_ATTRIBUTE_HANDLE 0x0001
+//#define BT_ATT_LAST_ATTRIBUTE_HANDLE 0xffff
 
 void thread_ble_base(void);
 
