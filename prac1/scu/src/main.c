@@ -369,7 +369,10 @@ void main(void)
 
 	}
 	*/
-	const struct device *dev = scu_sensors_init();
+	const struct device *hts211 = scu_sensors_init(HTS211);
+	const struct device *ccs811 = scu_sensors_init(CCS811);
+	const struct device *lis2dh = scu_sensors_init(LIS2DH);
+	const struct device *lps22hb = scu_sensors_init(LPS22HB);
 
 	err = bt_enable(NULL);
 	if (err) {
@@ -377,7 +380,7 @@ void main(void)
 		return;
 	}
 
-	bt_set_name("JM TEMP LIB2");
+	bt_set_name("JM AIR");
 
 	bt_ready();
 
@@ -410,9 +413,7 @@ void main(void)
 
 		signed_value = humidity.val1;
 		*/
-		//scu_sensors_scan();
-		//signed_value = scu_sensors_get_temp();
-		scu_sensors_scan(dev);
+		scu_sensors_scan(hts211, ccs811, lis2dh, lps22hb);
 		signed_value = scu_sensors_get_temp();
 
 		/* Current Time Service updates only when time is changed */
