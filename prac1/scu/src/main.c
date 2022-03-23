@@ -1,9 +1,7 @@
-/* main.c - Application main entry point */
-
-/*
- * Copyright (c) 2015-2016 Intel Corporation
- *
- * SPDX-License-Identifier: Apache-2.0
+/**
+ * @file main.c
+ * @author Jack Mason
+ * @date 2022-03-23
  */
 
 #include <zephyr/types.h>
@@ -24,27 +22,31 @@
 #include <bluetooth/services/bas.h>
 #include <bluetooth/services/hrs.h>
 
-//#include "cts.h"
+//Keeps Track of BLE connection within APP
+bool ble_conencted = false; // ?
 
 /* Custom Service Variables */
-#define BT_UUID_CUSTOM_SERVICE_VAL \
-	BT_UUID_128_ENCODE(0x12345678, 0x1234, 0x5678, 0x1234, 0x56789abcdef0) //Custom service UUID
 
-static struct bt_uuid_128 vnd_uuid = BT_UUID_INIT_128( //primary service variable
-	BT_UUID_CUSTOM_SERVICE_VAL);
+static struct bt_uuid_128 mobile_uuid = BT_UUID_INIT_128(
+    0xe3, 0x68, 0x4d, 0xe0, 0xa9, 0xcf, 0x11, 0xec,
+    0xb9, 0x09, 0x02, 0x42, 0xac, 0x12, 0x00, 0x02);
+
+static struct bt_uuid_128 node_tx = BT_UUID_INIT_128( 
+    0x2a, 0xae, 0xfc, 0xda, 0xa9, 0xd0, 0x11, 0xec, 
+    0xb9, 0x09, 0x02, 0x42, 0xac, 0x12, 0x00, 0x02);
+
+static struct bt_uuid_128 node_rx = BT_UUID_INIT_128(
+    0x41, 0xbf, 0xbd, 0xba, 0xa9, 0xd0, 0x11, 0xec, 
+    0xb9, 0x09, 0x02, 0x42, 0xac, 0x12, 0x00, 0x02);
 
 static struct bt_uuid_128 vnd_enc_uuid = BT_UUID_INIT_128(
 	BT_UUID_128_ENCODE(0x12345678, 0x1234, 0x5678, 0x1234, 0x56789abcdef1));
 
-static struct bt_uuid_128 vnd_auth_uuid = BT_UUID_INIT_128(
-	BT_UUID_128_ENCODE(0x12345678, 0x1234, 0x5678, 0x1234, 0x56789abcdef2));
+//static struct bt_uuid_128 vnd_auth_uuid = BT_UUID_INIT_128(
+	//BT_UUID_128_ENCODE(0x2aaefcda, 0xa9d0, 0x11ec, 0xb909, 0x0242ac120002));
 
 #define VND_MAX_LEN 20
-
-static uint8_t vnd_value[VND_MAX_LEN + 1] = { 'V', 'e', 'n', 'd', 'o', 'r'}; 
-static uint8_t vnd_auth_value[VND_MAX_LEN + 1] = { 'V', 'e', 'n', 'd', 'o', 'r'};
-static uint8_t vnd_wwr_value[VND_MAX_LEN + 1] = { 'V', 'e', 'n', 'd', 'o', 'r' };
-
+/*
 static ssize_t read_vnd(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			void *buf, uint16_t len, uint16_t offset)
 {
@@ -69,68 +71,22 @@ static ssize_t write_vnd(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 
 	return len;
 }
+*/
 
-static uint8_t simulate_vnd;
-static uint8_t indicating; //indication
-static struct bt_gatt_indicate_params ind_params; //indication
+//static uint8_t simulate_vnd;
 
+/*
 static void vnd_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 {
 	simulate_vnd = (value == BT_GATT_CCC_INDICATE) ? 1 : 0;
 }
-
-//some indication functions
-static void indicate_cb(struct bt_conn *conn,
-			struct bt_gatt_indicate_params *params, uint8_t err)
-{
-	printk("Indication %s\n", err != 0U ? "fail" : "success");
-}
-
-static void indicate_destroy(struct bt_gatt_indicate_params *params)
-{
-	printk("Indication complete\n");
-	indicating = 0U;
-}
-
+*/
 
 #define VND_LONG_MAX_LEN 74
-static uint8_t vnd_long_value[VND_LONG_MAX_LEN + 1] = {
-		  'V', 'e', 'n', 'd', 'o', 'r', ' ', 'd', 'a', 't', 'a', '1',
-		  'V', 'e', 'n', 'd', 'o', 'r', ' ', 'd', 'a', 't', 'a', '2',
-		  'V', 'e', 'n', 'd', 'o', 'r', ' ', 'd', 'a', 't', 'a', '3',
-		  'V', 'e', 'n', 'd', 'o', 'r', ' ', 'd', 'a', 't', 'a', '4',
-		  'V', 'e', 'n', 'd', 'o', 'r', ' ', 'd', 'a', 't', 'a', '5',
-		  'V', 'e', 'n', 'd', 'o', 'r', ' ', 'd', 'a', 't', 'a', '6',
-		  '.', ' ' };
 
-static ssize_t write_long_vnd(struct bt_conn *conn,
-			      const struct bt_gatt_attr *attr, const void *buf,
-			      uint16_t len, uint16_t offset, uint8_t flags)
-{
-	uint8_t *value = attr->user_data;
-
-	if (flags & BT_GATT_WRITE_FLAG_PREPARE) {
-		return 0;
-	}
-
-	if (offset + len > VND_LONG_MAX_LEN) {
-		return BT_GATT_ERR(BT_ATT_ERR_INVALID_OFFSET);
-	}
-
-	memcpy(value + offset, buf, len);
-	value[offset + len] = 0;
-
-	return len;
-}
-
-static const struct bt_uuid_128 vnd_long_uuid = BT_UUID_INIT_128(
-	BT_UUID_128_ENCODE(0x12345678, 0x1234, 0x5678, 0x1234, 0x56789abcdef3));
-
-static struct bt_gatt_cep vnd_long_cep = {
-	.properties = BT_GATT_CEP_RELIABLE_WRITE,
-};
 
 static int signed_value;
+uint8_t rx_buff[] = {0xAA, 0x01, 0x16, 0x00, 0x00};
 
 static ssize_t read_signed(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			   void *buf, uint16_t len, uint16_t offset)
@@ -157,74 +113,39 @@ static ssize_t write_signed(struct bt_conn *conn, const struct bt_gatt_attr *att
 }
 
 static const struct bt_uuid_128 vnd_signed_uuid = BT_UUID_INIT_128(
-	BT_UUID_128_ENCODE(0x13345678, 0x1234, 0x5678, 0x1334, 0x56789abcdef3));
+	BT_UUID_128_ENCODE(0x41bfbdba, 0xa9d0, 0x11ec, 0xb909, 0x0242ac120002));
 
-static const struct bt_uuid_128 vnd_write_cmd_uuid = BT_UUID_INIT_128(
-	BT_UUID_128_ENCODE(0x12345678, 0x1234, 0x5678, 0x1234, 0x56789abcdef4));
-
-static ssize_t write_without_rsp_vnd(struct bt_conn *conn,
-				     const struct bt_gatt_attr *attr,
-				     const void *buf, uint16_t len, uint16_t offset,
-				     uint8_t flags)
+static ssize_t read_rx(struct bt_conn *conn,
+                         const struct bt_gatt_attr *attr, void *buf,
+                         uint16_t len, uint16_t offset)
 {
-	uint8_t *value = attr->user_data;
+    const int16_t *value = attr->user_data;
 
-	if (!(flags & BT_GATT_WRITE_FLAG_CMD)) {
-		/* Write Request received. Reject it since this Characteristic
-		 * only accepts Write Without Response.
-		 */
-		return BT_GATT_ERR(BT_ATT_ERR_WRITE_REQ_REJECTED);
-	}
-
-	if (offset + len > VND_MAX_LEN) {
-		return BT_GATT_ERR(BT_ATT_ERR_INVALID_OFFSET);
-	}
-
-	memcpy(value + offset, buf, len);
-	value[offset + len] = 0;
-
-	return len;
+    return bt_gatt_attr_read(conn, attr, buf, len, offset, value,
+                             sizeof(rx_buff));
 }
 
 /* Vendor Primary Service Declaration */
 BT_GATT_SERVICE_DEFINE(vnd_svc, //may be able to change vnd_svc to give service name
-	BT_GATT_PRIMARY_SERVICE(&vnd_uuid), //start primary service here
-	BT_GATT_CHARACTERISTIC(&vnd_enc_uuid.uuid,
-			       BT_GATT_CHRC_READ | BT_GATT_CHRC_WRITE |
-			       BT_GATT_CHRC_INDICATE, //where the indicate property is added
-			       BT_GATT_PERM_READ_ENCRYPT |
-			       BT_GATT_PERM_WRITE_ENCRYPT,
-			       read_vnd, write_vnd, vnd_value),
-	BT_GATT_CCC(vnd_ccc_cfg_changed,
-		    BT_GATT_PERM_READ | BT_GATT_PERM_WRITE_ENCRYPT),
-	BT_GATT_CHARACTERISTIC(&vnd_auth_uuid.uuid,
-			       BT_GATT_CHRC_READ | BT_GATT_CHRC_WRITE,
-			       BT_GATT_PERM_READ_AUTHEN |
-			       BT_GATT_PERM_WRITE_AUTHEN,
-			       read_vnd, write_vnd, vnd_auth_value),
-	BT_GATT_CHARACTERISTIC(&vnd_long_uuid.uuid, BT_GATT_CHRC_READ |
-			       BT_GATT_CHRC_WRITE | BT_GATT_CHRC_EXT_PROP,
-			       BT_GATT_PERM_READ | BT_GATT_PERM_WRITE |
-			       BT_GATT_PERM_PREPARE_WRITE,
-			       read_vnd, write_long_vnd, &vnd_long_value),
-	BT_GATT_CEP(&vnd_long_cep),
+	BT_GATT_PRIMARY_SERVICE(&mobile_uuid), //start primary service here
+	
 	BT_GATT_CHARACTERISTIC(&vnd_signed_uuid.uuid, BT_GATT_CHRC_READ |
 			       BT_GATT_CHRC_WRITE | BT_GATT_CHRC_AUTH,
 			       BT_GATT_PERM_READ | BT_GATT_PERM_WRITE,
 			       read_signed, write_signed, &signed_value),
-	BT_GATT_CHARACTERISTIC(&vnd_write_cmd_uuid.uuid,
-			       BT_GATT_CHRC_WRITE_WITHOUT_RESP,
-			       BT_GATT_PERM_WRITE, NULL,
-			       write_without_rsp_vnd, &vnd_wwr_value),
+	
+	BT_GATT_CHARACTERISTIC(&node_rx.uuid,
+                                              BT_GATT_CHRC_READ,
+                                              BT_GATT_PERM_READ,
+                                              read_rx, NULL, &rx_buff),
+
 );
 
 static const struct bt_data ad[] = { 
 	BT_DATA_BYTES(BT_DATA_FLAGS, (BT_LE_AD_GENERAL | BT_LE_AD_NO_BREDR)),
-	//BT_DATA_BYTES(BT_DATA_UUID16_ALL,
-		      //BT_UUID_16_ENCODE(BT_UUID_HRS_VAL),
-		      //BT_UUID_16_ENCODE(BT_UUID_BAS_VAL),
-		      //BT_UUID_16_ENCODE(BT_UUID_CTS_VAL)),
-	BT_DATA_BYTES(BT_DATA_UUID128_ALL, BT_UUID_CUSTOM_SERVICE_VAL), //custom service gets added here
+	BT_DATA_BYTES(BT_DATA_UUID128_ALL, 0xe3, 0x68, 0x4d, 0xe0, 0xa9, 0xcf, 0x11, 0xec,
+                    0xb9, 0x09, 0x02, 0x42, 0xac, 0x12, 0x00, 0x02),
+					//BT_UUID_CUSTOM_SERVICE_VAL), //custom service gets added here
 };
 
 void mtu_updated(struct bt_conn *conn, uint16_t tx, uint16_t rx)
@@ -313,6 +234,7 @@ void main(void)
 	}
 
 	bt_set_name("JM CSERVUP");
+	bt_set_name("JM CSERVUP");
 
 	bt_ready();
 
@@ -332,26 +254,5 @@ void main(void)
 		k_sleep(K_SECONDS(1));
 
 		signed_value = (signed_value + 1) % 20;
-
-		/* Current Time Service updates only when time is changed */
-		//cts_notify(); //disable cts?
-
-		/* Vendor indication simulation */
-		//some code related to the indication property
-		if (simulate_vnd && vnd_ind_attr) {
-			if (indicating) {
-				continue;
-			}
-
-			ind_params.attr = vnd_ind_attr;
-			ind_params.func = indicate_cb;
-			ind_params.destroy = indicate_destroy;
-			ind_params.data = &indicating;
-			ind_params.len = sizeof(indicating);
-
-			if (bt_gatt_indicate(NULL, &ind_params) == 0) {
-				indicating = 1U;
-			}
-		}
 	}
 }
