@@ -35,10 +35,10 @@ static struct bt_conn *default_conn;
 bool ble_connected;
 
 //RX BUFFER
-uint8_t rx_buff[] = {0x00, 0x00, 0x00, 0x00, 0x00};
+uint16_t rx_buff[] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
 
 //TX BUFFER
-uint8_t tx_buff[] = {0x00, 0x00, 0x00, 0x00, 0x00};
+uint16_t tx_buff[] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
 
 /**
  * @brief Callback for BLE scanning, checks weather the returned 
@@ -261,7 +261,7 @@ void thread_ble_read_out(void)
 
         }
 
-        k_usleep(100);
+        k_usleep(1000);
     }
 }
 
