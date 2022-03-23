@@ -26,8 +26,8 @@
 #define BLE_CONN_SLEEP_MS 1000
 
 //GATT CHARACTERISTIC VALUES
-extern uint16_t rx_buff[];
-extern uint16_t tx_buff[];
+extern uint8_t rx_buff[];
+extern uint8_t tx_buff[];
 
 void thread_ble_led(void);
 

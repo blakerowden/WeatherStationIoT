@@ -35,14 +35,10 @@ static struct bt_conn *default_conn;
 bool ble_connected;
 
 //RX BUFFER
-int16_t rx_buff[] = {
-    0x00, 0x00, 0x00, 0x00
-};
+uint8_t rx_buff[] = {0x00, 0x00, 0x00, 0x00, 0x00};
 
-//RX BUFFER
-int16_t tx_buff[] = {
-    0x00, 0x00, 0x00, 0x00
-};
+//TX BUFFER
+uint8_t tx_buff[] = {0x00, 0x00, 0x00, 0x00, 0x00};
 
 /**
  * @brief Callback for BLE scanning, checks weather the returned 
@@ -166,7 +162,6 @@ uint8_t read_from_scu(struct bt_conn *conn, uint8_t err,
                               const void *data, uint16_t length)
 {
     memcpy(&rx_buff, data, sizeof(rx_buff));
-    //printk("RSSI: N1:%d, N2:%d, N3:%d, N4:%d\n", rx_rssi[0], rx_rssi[1], rx_rssi[2], rx_rssi[3]);
     return 0;
 }
 
@@ -262,7 +257,7 @@ void thread_ble_read_out(void)
             //Read from the rx attribute
             bt_gatt_read(default_conn, &read_params_rx);
             
-            printk("%x,%x,%x,%x,%x \n", rx_buff[0], rx_buff[1], rx_buff[2], rx_buff[3], rx_buff[4]);
+            printk("0x%X,0x%X,0x%X,0x%X,0x%X \n", rx_buff[0], rx_buff[1], rx_buff[2], rx_buff[3], rx_buff[4]);
 
         }
 
