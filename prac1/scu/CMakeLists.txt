@@ -6,8 +6,10 @@ project(peripheral)
 
 include_directories(
                         ../../oslib/scu_drivers/scu_sensors
+                        ../../oslib/common/
                         )
 
 target_sources(app PRIVATE
   src/main.c
+  ../../oslib/scu_drivers/scu_sensors/scu_sensors.c
 )

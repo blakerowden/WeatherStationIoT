@@ -29,5 +29,8 @@ int scu_sensors_get_acc_x(void);
 int scu_sensors_get_acc_y(void);
 int scu_sensors_get_acc_z(void);
 int scu_sensors_get_pressure(void);
+int scu_sensors_get_button_status(void);
+int scu_sensors_toggle_led(void);
+void scu_sensors_io_init(void);
 
 #endif //SCU_SENS_H
