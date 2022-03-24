@@ -23,6 +23,7 @@
 #include <bluetooth/services/hrs.h>
 
 #include "scu_sensors.h"
+//#include "led_driver.h"
 
 //Keeps Track of BLE connection within APP
 bool ble_conencted = false; // ?
@@ -274,9 +275,21 @@ void main(void)
 	 * of starting delayed work so we do it here
 	 */
 	tx_buff[0] = 0;
+	scu_sensors_io_init();
+	int test;
 	while (1) {
 		k_sleep(K_SECONDS(1));
-		scu_sensors_get_temp();
+
+		test = scu_sensors_get_button_status();
+		scu_sensors_toggle_led();
+
+
+		if (test >= 1) { //0
+			//gpio_pin_set_dt(&led, val);
+			scu_sensors_toggle_led();
+		}
+		
+		//scu_sensors_get_temp();
 
 		//signed_value = (signed_value + 1) % 20;
 		//tx_buff[0] = (tx_buff[0] + 1) % 20;
