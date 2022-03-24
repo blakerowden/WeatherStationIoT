@@ -39,47 +39,11 @@ uint16_t rx_update;
 
 //RX BUFFER
 uint16_t rx_buff[] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
+uint16_t temp_buff[] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
 
 //TX BUFFER
 uint16_t tx_buff[] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
 
-/**
- * @brief Callback for BLE scanning, checks weather the returned 
- *          UUID matches the custom UUID of the mobile device.
- *        If matched, attempt to connect to device.
- * 
- * @param data Callback data from scanning
- * @param user_data Device User data
- * @return true 
- * @return false 
- */
-
-
-static ssize_t write_rx(struct bt_conn *conn, const struct bt_gatt_attr *attr,
-			const void *buf, uint16_t len, uint16_t offset,
-			uint8_t flags)
-{
-	uint8_t *value = attr->user_data;
-
-	if (offset + len > sizeof(rx_buff)) {
-		return BT_GATT_ERR(BT_ATT_ERR_INVALID_OFFSET);
-	}
-
-	memcpy(value + offset, buf, len);
-	rx_update = 1U;
-
-	return len;
-}
-
-
-BT_GATT_SERVICE_DEFINE(ahu,
-                    
-        BT_GATT_PRIMARY_SERVICE(&node_ahu.uuid),
-
-        BT_GATT_CHARACTERISTIC(&node_rx.uuid,
-                BT_GATT_CHRC_WRITE,
-                BT_GATT_PERM_WRITE,
-                write_rx, NULL, &rx_buff),);
 
 static bool parse_device(struct bt_data *data, void *user_data)
 {
@@ -316,20 +280,27 @@ void thread_ble_read_out(void)
         if (ble_connected)
         {
             
-            timeStamp = k_cyc_to_ms_floor64(k_cycle_get_32());
-            //Read from the rx attribute
             bt_gatt_read(default_conn, &read_params_rx);
-            //printk("Read:%i, Write:%i \n", tx_handle, rx_handle);
-            //printk("0x%X,0x%X,0x%X,0x%X,0x%X \n", rx_buff[0], rx_buff[1], rx_buff[2], rx_buff[3], rx_buff[4]);
-            if (rx_buff[3] == 0x0A) {
-                tx_buff[0] = 0xFF;
-                tx_buff[1] = 0xFF;
-                scu_write();
+            // Check Data Change
+            if (rx_buff[0] != temp_buff[0] || 
+                    rx_buff[1] != temp_buff[1] ||
+                    rx_buff[2] != temp_buff[2] ||
+                    rx_buff[3] != temp_buff[3] ||
+                    rx_buff[4] != temp_buff[4]) {
+
+                printk("0x%X,0x%X,0x%X,0x%X,0x%X \n", rx_buff[0], rx_buff[1], rx_buff[2], rx_buff[3], rx_buff[4]);
             }
+            
+            // Overwrite data with new data
+            temp_buff[0] = rx_buff[0];
+            temp_buff[1] = rx_buff[1];
+            temp_buff[2] = rx_buff[2];
+            temp_buff[3] = rx_buff[3];
+            temp_buff[4] = rx_buff[4];
 
         }
 
-        k_msleep(1000);
+        k_msleep(1);
     }
 }
 
