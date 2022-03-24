@@ -86,7 +86,10 @@ static void vnd_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 
 
 static int signed_value;
-uint8_t rx_buff[] = {0xAA, 0x01, 0x16, 0x00, 0x00};
+//uint8_t rx_buff[] = {0xAA, 0x01, 0x16, 0xcc, 0xdd};
+//uint8_t rx_buff[] = {0xAA, 0x01, 0x16, 0x00, 0x00};
+uint16_t rx_buff[] = {0xAA00, 0x0100, 0x1600, 0xBB00, 0xCC00};
+uint16_t tx_buff[] = {0x1122, 0x3344, 0x5566, 0x7788, 0x99AA};
 
 static ssize_t read_signed(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			   void *buf, uint16_t len, uint16_t offset)
@@ -94,7 +97,8 @@ static ssize_t read_signed(struct bt_conn *conn, const struct bt_gatt_attr *attr
 	const char *value = attr->user_data;
 
 	return bt_gatt_attr_read(conn, attr, buf, len, offset, value,
-				 sizeof(signed_value));
+				 //sizeof(signed_value));
+				 sizeof(tx_buff));
 }
 
 static ssize_t write_signed(struct bt_conn *conn, const struct bt_gatt_attr *attr,
@@ -103,7 +107,8 @@ static ssize_t write_signed(struct bt_conn *conn, const struct bt_gatt_attr *att
 {
 	uint8_t *value = attr->user_data;
 
-	if (offset + len > sizeof(signed_value)) {
+	//if (offset + len > sizeof(signed_value)) {
+	if (offset + len > sizeof(tx_buff)) {
 		return BT_GATT_ERR(BT_ATT_ERR_INVALID_OFFSET);
 	}
 
@@ -129,10 +134,11 @@ static ssize_t read_rx(struct bt_conn *conn,
 BT_GATT_SERVICE_DEFINE(vnd_svc, //may be able to change vnd_svc to give service name
 	BT_GATT_PRIMARY_SERVICE(&mobile_uuid), //start primary service here
 	
-	BT_GATT_CHARACTERISTIC(&vnd_signed_uuid.uuid, BT_GATT_CHRC_READ |
+	BT_GATT_CHARACTERISTIC(&node_tx.uuid, BT_GATT_CHRC_READ |
 			       BT_GATT_CHRC_WRITE | BT_GATT_CHRC_AUTH,
 			       BT_GATT_PERM_READ | BT_GATT_PERM_WRITE,
-			       read_signed, write_signed, &signed_value),
+			       //read_signed, write_signed, &signed_value),
+				   read_signed, write_signed, &tx_buff),
 	
 	BT_GATT_CHARACTERISTIC(&node_rx.uuid,
                                               BT_GATT_CHRC_READ,
@@ -250,9 +256,16 @@ void main(void)
 	/* Implement notification. At the moment there is no suitable way
 	 * of starting delayed work so we do it here
 	 */
+	tx_buff[0] = 0;
 	while (1) {
 		k_sleep(K_SECONDS(1));
 
-		signed_value = (signed_value + 1) % 20;
+		//signed_value = (signed_value + 1) % 20;
+		//tx_buff[0] = (tx_buff[0] + 1) % 20;
+		if (tx_buff[0] == 0) {
+			rx_buff[0] = 0xAA;
+		} else {
+			rx_buff[0] = 0xFF;
+		}
 	}
 }
