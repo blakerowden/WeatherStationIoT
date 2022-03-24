@@ -22,6 +22,8 @@
 #include <bluetooth/services/bas.h>
 #include <bluetooth/services/hrs.h>
 
+#include "scu_sensors.h"
+
 //Keeps Track of BLE connection within APP
 bool ble_conencted = false; // ?
 
@@ -227,6 +229,21 @@ static struct bt_conn_auth_cb auth_cb_display = {
 	.cancel = auth_cancel,
 };
 
+void handle_hci_packet() {
+	if (tx_buff[0] = 0xAA12) {
+		//valid
+		int i;
+		for (i = 0; i < 5; i++) {
+			rx_buff[i] = 0xAAAA;
+		}
+	} else {
+		int j;
+		for (j = 0; j < 5; j++) {
+			rx_buff[j] = 0xFFFF;
+		}
+	}
+}
+
 void main(void)
 {
 	struct bt_gatt_attr *vnd_ind_attr; //indication
@@ -259,13 +276,15 @@ void main(void)
 	tx_buff[0] = 0;
 	while (1) {
 		k_sleep(K_SECONDS(1));
+		scu_sensors_get_temp();
 
 		//signed_value = (signed_value + 1) % 20;
 		//tx_buff[0] = (tx_buff[0] + 1) % 20;
 		if (tx_buff[0] == 0) {
-			rx_buff[0] = 0xAA;
+			rx_buff[0] = 0xAABB;
 		} else {
-			rx_buff[0] = 0xFF;
+			rx_buff[0] = 0xEEFF;
 		}
+		//handle_hci_packet();
 	}
 }
