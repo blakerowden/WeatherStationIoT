@@ -8,3 +8,8 @@
  * @copyright Copyright (c) 2022
  * 
  */
+
+#ifndef SHELL_SCU_H
+#define SHELL_SCU_H
+
+#endif //SHELL_SCU_H

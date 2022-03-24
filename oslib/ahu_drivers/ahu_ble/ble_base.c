@@ -27,24 +27,28 @@
 #include "ble_base.h"
 #include "led_driver.h"
 #include "ble_uuid.h"
+#include "shell_scu.h"
 
-void thread_ble_base(void);
+static void gatt_discovery(void);
 static void start_scan(void);
-static uint16_t tx_handle;
-static uint16_t rx_handle;
-static struct bt_conn *default_conn;
-bool ble_connected;
-static void gatt_discover(void);
-uint16_t rx_update;
 
-//RX BUFFER
-uint16_t rx_buff[] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
-uint16_t temp_buff[] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
+static uint16_t tx_handle;
+static struct bt_conn *default_conn;
+
+//BLE Connection Flag
+bool ble_connected;
+
+K_SEM_DEFINE(sem_name, 0, 1);
 
 //TX BUFFER
 uint16_t tx_buff[] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
+uint16_t rx_buff[] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
 
-
+/**
+ * @brief Used to parse the advertisement data 
+ *        in order to find the UUID of the service we are looking for.
+ * 
+ */
 static bool parse_device(struct bt_data *data, void *user_data)
 {
     bt_addr_le_t *addr = user_data;
@@ -141,27 +145,6 @@ static void start_scan(void)
 }
 
 /**
- * @brief Callback for when reading RSSI Gatt atrribute data
- *          from the mobile device. The data read is saved into    
- *          and internal rx buffer. 
- * 
- * @param conn ble connection handler
- * @param err  ble ATT error val
- * @param params Read params
- * @param data Data read from GATT attribute
- * @param length Len of Data
- * @return uint8_t retVal (custom)
- */
-uint8_t read_from_scu(struct bt_conn *conn, uint8_t err,
-                              struct bt_gatt_read_params *params,
-                              const void *data, uint16_t length)
-{
-    memcpy(&rx_buff, data, sizeof(rx_buff));
-    return 0;
-}
-
-
-/**
  * @brief BLE Device connected callback function. If an error is detected
  *          scan is restarted. Else, the app can establish that the 
  *          devices are now conneted using flag ble_connected;
@@ -192,7 +175,7 @@ static void connected(struct bt_conn *conn, uint8_t err)
     }
     ble_connected = true;
     printk("Connected: %s\n", addr);
-    gatt_discover();
+    gatt_discovery();
 }
 
 /**
@@ -222,8 +205,6 @@ static void disconnected(struct bt_conn *conn, uint8_t reason)
     start_scan();
 }
 
-
-
 /**
  * @brief Connection callback struct, required to set conn/disconn
  *          function pointers.
@@ -244,7 +225,11 @@ static void gatt_write_cb(struct bt_conn *conn, uint8_t err,
 
 }
 
-static void scu_write(void)
+/**
+ * @brief Write data to the SCU TX GATT attribute.
+ * 
+ */
+void scu_write(void)
 {
 	static struct bt_gatt_write_params write_params;
 	int err;
@@ -259,54 +244,11 @@ static void scu_write(void)
 		printk("bt_gatt_write failed: %d\n", err);
 	}
 
-	printk("success\n");
-}
-
-void thread_ble_read_out(void)
-{
-    static struct bt_gatt_read_params read_params_rx = {
-        .func = read_from_scu,
-        .handle_count = 0,
-        .by_uuid.uuid = &node_rx.uuid,
-        .by_uuid.start_handle = BT_ATT_FIRST_ATTRIBUTE_HANDLE,
-        .by_uuid.end_handle = BT_ATT_LAST_ATTRIBUTE_HANDLE,
-    };
-
-    int timeStamp = 0;
-
-    while (1)
-    {
-
-        if (ble_connected)
-        {
-            
-            bt_gatt_read(default_conn, &read_params_rx);
-            // Check Data Change
-            if (rx_buff[0] != temp_buff[0] || 
-                    rx_buff[1] != temp_buff[1] ||
-                    rx_buff[2] != temp_buff[2] ||
-                    rx_buff[3] != temp_buff[3] ||
-                    rx_buff[4] != temp_buff[4]) {
-
-                printk("0x%X,0x%X,0x%X,0x%X,0x%X \n", rx_buff[0], rx_buff[1], rx_buff[2], rx_buff[3], rx_buff[4]);
-            }
-            
-            // Overwrite data with new data
-            temp_buff[0] = rx_buff[0];
-            temp_buff[1] = rx_buff[1];
-            temp_buff[2] = rx_buff[2];
-            temp_buff[3] = rx_buff[3];
-            temp_buff[4] = rx_buff[4];
-
-        }
-
-        k_msleep(1);
-    }
 }
 
 /**
  * @brief BLE Base entry thread, starts initial ble scanning.
- *          When a valid mobile device is connected.
+ *       Also, sets the connection callback struct.
  */
 void thread_ble_base(void)
 {
@@ -331,6 +273,9 @@ void thread_ble_base(void)
     printk("Debug_1\n");
 }
 
+/**
+ * @brief Used to parse the GATT service and characteristic data.
+ */
 static uint8_t discover_func(struct bt_conn *conn,
 		const struct bt_gatt_attr *attr,
 		struct bt_gatt_discover_params *params)
@@ -338,9 +283,8 @@ static uint8_t discover_func(struct bt_conn *conn,
 	int err;
 
 	if (attr == NULL) {
-		if (tx_handle == 0 || rx_handle == 0) {
-			printk("Did not discover TX (%x) or RX (%x)\n",
-			     tx_handle, rx_handle);
+		if (tx_handle == 0) {
+			printk("Did not discover TX (%x)", tx_handle);
 		}
 
 		(void)memset(params, 0, sizeof(*params));
@@ -366,11 +310,7 @@ static uint8_t discover_func(struct bt_conn *conn,
 	} else if (params->type == BT_GATT_DISCOVER_CHARACTERISTIC) {
 		struct bt_gatt_chrc *chrc = (struct bt_gatt_chrc *)attr->user_data;
 
-		if (bt_uuid_cmp(chrc->uuid, &node_rx.uuid) == 0) {
-			printk("Found rx\n");
-			rx_handle = chrc->value_handle;
-           
-		} else if (bt_uuid_cmp(chrc->uuid, &node_tx.uuid) == 0) {
+		if (bt_uuid_cmp(chrc->uuid, &node_tx.uuid) == 0) {
 			printk("Found tx\n");
 			tx_handle = chrc->value_handle;
 		}
@@ -379,7 +319,11 @@ static uint8_t discover_func(struct bt_conn *conn,
 	return BT_GATT_ITER_CONTINUE;
 }
 
-static void gatt_discover(void)
+/**
+ * @brief BLE GATT discovery function, used to discover the SCU TX GATT attribute.
+ * 
+ */
+static void gatt_discovery(void)
 {
 	static struct bt_gatt_discover_params discover_params;
 	int err;
@@ -399,9 +343,8 @@ static void gatt_discover(void)
 }
 
 /**
- * @brief Super important thread that will ensure le
- * 			led is blinking. Like i said, this is super important.
- * 
+ * @brief BLE LED blinker thread, blinks the LED when BLE is connected.
+ * 			Used for debugging
  */
 void thread_ble_led(void)
 {
@@ -415,6 +358,8 @@ void thread_ble_led(void)
 
         if (ble_connected)
         {
+            tx_buff[0] = tx_buff[0] + 1;
+            scu_write();
             gpio_pin_set(device_get_binding(LED1), LED1_PIN, (int)led_is_on);
             gpio_pin_set(device_get_binding(LED0), LED0_PIN, (int)false);
             k_msleep(BLE_CONN_SLEEP_MS);
@@ -427,3 +372,49 @@ void thread_ble_led(void)
         }
     }
 }
+
+/**
+ * @brief CALLBACK function to process incoming data from the SCU RX GATT attribute. 
+ */
+static ssize_t write_rx(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+			const void *buf, uint16_t len, uint16_t offset,
+			uint8_t flags)
+{
+	uint8_t *value = attr->user_data;
+
+	if (offset + len > sizeof(rx_buff)) {
+		return BT_GATT_ERR(BT_ATT_ERR_INVALID_OFFSET);
+	}
+
+	memcpy(value + offset, buf, len);
+    k_sem_give(&sem_name);
+    
+	return len;
+}
+
+void process_rx_data(void) {
+     
+     while(1) {
+        
+        if (!k_sem_take(&sem_name, K_FOREVER)) {
+            printk("[RX]: 0x%X 0x%x 0x%X 0x%x 0x%X\n", 
+                rx_buff[0], rx_buff[1], rx_buff[2], rx_buff[3], rx_buff[4]);
+        }
+            
+    }
+
+}
+
+
+/**
+ * @brief Initialize the SCU GATT attributes.
+ * 
+ */
+BT_GATT_SERVICE_DEFINE(ahu,
+                    
+        BT_GATT_PRIMARY_SERVICE(&node_ahu),
+
+        BT_GATT_CHARACTERISTIC(&node_rx.uuid,
+                BT_GATT_CHRC_WRITE,
+                BT_GATT_PERM_WRITE,
+                NULL, write_rx, &rx_buff),);

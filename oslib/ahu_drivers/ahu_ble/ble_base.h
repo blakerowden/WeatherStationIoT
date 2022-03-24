@@ -26,13 +26,21 @@
 #define BLE_CONN_SLEEP_MS 1000
 
 //GATT CHARACTERISTIC VALUES
-extern uint16_t rx_buff[];
 extern uint16_t tx_buff[];
+extern uint16_t rx_buff[];
 
 void thread_ble_led(void);
 
 void thread_ble_base(void);
 
-void thread_ble_read_out(void);
+void process_rx_data(void);
+
+/**
+ * @brief Write data to the SCU TX GATT attribute.
+ * 
+ */
+void scu_write(void);
+
+
 
 #endif //BLE_BASE_H

@@ -22,6 +22,7 @@
 #include "shell_base.h"
 #include "shell_time.h"
 #include "shell_led.h"
+#include "shell_scu.h"
 #include "ble_base.h"
 
 
@@ -59,14 +60,12 @@ void main(void) {
 
 //START BLE BASE entry thread : Delayed Start (Wait for USB to be ready)
 K_THREAD_DEFINE(ble_base, THREAD_BLE_BASE_STACK, thread_ble_base, NULL, NULL, NULL, THREAD_PRIORITY_BLE_BASE, 0, 0);
-#if (DEBUG_LEVEL & DEBUG_SHELL)
-//Reads BLE Buffers and prints them to USB Console
-K_THREAD_DEFINE(ble_read_out, THREAD_BLE_BASE_STACK, thread_ble_read_out, NULL, NULL, NULL, THREAD_PRIORITY_READ_BASE, 0, 0);
-#endif
+K_THREAD_DEFINE(rx_data, THREAD_BLE_BASE_STACK, process_rx_data, NULL, NULL, NULL, THREAD_PRIORITY_BLE_BASE, 0, 0);
 //Start BLE LED Thread
 #if (DEBUG_LEVEL & DEBUG_BLE)
 K_THREAD_DEFINE(ble_led, THREAD_BLE_LED_STACK, thread_ble_led, NULL, NULL, NULL, THREAD_PRIORITY_BLE_LED, 0, 0);
 #endif
+
 // Shell Commands ==============================================================
 
 // Level 1 //
@@ -78,7 +77,7 @@ SHELL_STATIC_SUBCMD_SET_CREATE(time_read,
 // Level 0 //
 SHELL_CMD_REGISTER(time, &time_read, "Display elapsed time since power on", cmd_disp_time);
 SHELL_CMD_REGISTER(led, NULL, "Control the AHUs LEDs", cmd_led_control);
-// SCU Command Interface
+
 SHELL_CMD_REGISTER(hts221, NULL, "Temp/Humidity", cmd_led_control);
 SHELL_CMD_REGISTER(lps22, NULL, "Pressure", cmd_led_control);
 
