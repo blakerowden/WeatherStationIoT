@@ -11,10 +11,10 @@
 
 #include "hci_driver.h"
 
-uint16_t tx_buff[] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
-uint16_t rx_buff[] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
+uint16_t tx_buff[] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
+uint16_t rx_buff[] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
 
-uint8_t get_data_length(uint16_t data1, uint16_t data2, uint16_t data3, uint16_t data4) {
+uint8_t get_data_length(uint16_t data1, uint16_t data2, uint16_t data3, uint16_t data4, uint16_t data5) {
     
     if (!data1) {
         return 1;
@@ -36,25 +36,33 @@ uint8_t get_data_length(uint16_t data1, uint16_t data2, uint16_t data3, uint16_t
         } else {
             return  6;
         }
-    } else {
+    } else if (!data5) {
         if (!(data4 & 0xFF00)) {
             return  7;
         } else {
             return  8;
         }
-    }
+    }else {
+        if (!(data5 & 0xFF00)) {
+            return  7;
+        } else {
+            return  8;
+        }
 
+    }
 }
 
-int package_hci_message(uint8_t type, uint16_t data1, uint16_t data2, uint16_t data3, uint16_t data4) {
+int package_hci_message(uint8_t type, uint16_t data1, uint16_t data2, uint16_t data3, uint16_t data4, uint16_t data5) {
     
-    uint8_t data_length = get_data_length(data1, data2, data3, data4);
+    uint8_t data_length = get_data_length(data1, data2, data3, data4, data5);
 
     switch (type) {
     case REQUEST:
         tx_buff[0] = (PREAMBLE << 8) | (REQUEST << 4) | data_length;
         tx_buff[1] = data1;
-        if (data_length > 6) {
+        if (data_length > 8) {
+            tx_buff[5] = data5;
+        } if (data_length > 6) {
             tx_buff[4] = data4;
         } if (data_length > 4) {
             tx_buff[3] = data3;
@@ -66,7 +74,9 @@ int package_hci_message(uint8_t type, uint16_t data1, uint16_t data2, uint16_t d
     case RESPONSE:
         rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | data_length;
         rx_buff[1] = data1;
-        if (data_length > 6) {
+        if (data_length > 8) {
+            rx_buff[5] = data5;
+        } if (data_length > 6) {
             rx_buff[4] = data4;
         } if (data_length > 4) {
             rx_buff[3] = data3;

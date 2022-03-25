@@ -16,7 +16,7 @@
 int cmd_hts221_read_temp(const struct shell *shell, size_t argc,
                         char **argv) {
     
-    package_hci_message(REQUEST, HTS221_T, 0, 0, 0);
+    package_hci_message(REQUEST, HTS221_T, 0, 0, 0, 0);
     scu_write();
     clear_tx();
 

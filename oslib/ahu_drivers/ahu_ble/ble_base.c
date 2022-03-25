@@ -213,6 +213,13 @@ static struct bt_conn_cb conn_callbacks = {
     .disconnected = disconnected,
 };
 
+/**
+ * @brief 
+ * 
+ * @param conn 
+ * @param err 
+ * @param params 
+ */
 static void gatt_write_cb(struct bt_conn *conn, uint8_t err,
 			  struct bt_gatt_write_params *params)
 {

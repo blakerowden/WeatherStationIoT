@@ -39,11 +39,11 @@ typedef enum {
     PB,
 } device_id;
 
-extern uint16_t tx_buff[5];
-extern uint16_t rx_buff[5];
+extern uint16_t tx_buff[6];
+extern uint16_t rx_buff[6];
 
-uint8_t get_data_length(uint16_t data1, uint16_t data2, uint16_t data3, uint16_t data4);
-int package_hci_message(uint8_t type, uint16_t data1, uint16_t data2, uint16_t data3, uint16_t data4);
+uint8_t get_data_length(uint16_t data1, uint16_t data2, uint16_t data3, uint16_t data4, uint16_t data5);
+int package_hci_message(uint8_t type, uint16_t data1, uint16_t data2, uint16_t data3, uint16_t data4, uint16_t data5);
 
 void clear_tx(void);
 void clear_rx(void);
