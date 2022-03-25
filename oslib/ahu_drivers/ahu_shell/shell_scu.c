@@ -89,7 +89,7 @@ int cmd_ccs811_read_voc(const struct shell *shell, size_t argc,
 int cmd_buzzer_write_freq(const struct shell *shell, size_t argc,
                         char **argv) {
     
-    uint16_t freq = atoi(argv[2]);
+    uint16_t freq = atoi(argv[1]);
     package_hci_message(REQUEST, BUZ, freq, 0, 0, 0);
     scu_write();
     clear_tx();
@@ -100,9 +100,9 @@ int cmd_buzzer_write_freq(const struct shell *shell, size_t argc,
 int cmd_rgb_write_rgb(const struct shell *shell, size_t argc,
                         char **argv) {
     
-    uint16_t red = atoi(argv[2]);
-    uint16_t green = atoi(argv[3]);
-    uint16_t blue = atoi(argv[4]);
+    uint16_t red = atoi(argv[1]);
+    uint16_t green = atoi(argv[2]);
+    uint16_t blue = atoi(argv[3]);
 
     package_hci_message(REQUEST, RGB_LED, red, green, blue, 0);
     scu_write();
@@ -124,7 +124,7 @@ int cmd_pb_read_state(const struct shell *shell, size_t argc,
 int cmd_dc_write_percentage(const struct shell *shell, size_t argc,
                         char **argv) {
     
-    uint16_t percentage = atoi(argv[2]);
+    uint16_t percentage = atoi(argv[1]);
     package_hci_message(REQUEST, DC, percentage, 0, 0, 0);
     scu_write();
     clear_tx();
@@ -135,8 +135,28 @@ int cmd_dc_write_percentage(const struct shell *shell, size_t argc,
 int cmd_sample_write_sec(const struct shell *shell, size_t argc,
                         char **argv) {
     
-    uint16_t sec = atoi(argv[2]);
+    uint16_t sec = atoi(argv[1]);
     package_hci_message(REQUEST, SAMPLE, sec, 0, 0, 0);
+    scu_write();
+    clear_tx();
+
+    return 0;
+}
+
+int cmd_all_on(const struct shell *shell, size_t argc,
+                        char **argv) {
+    
+    package_hci_message(REQUEST, ALL, 1, 0, 0, 0);
+    scu_write();
+    clear_tx();
+
+    return 0;
+}
+
+int cmd_all_off(const struct shell *shell, size_t argc,
+                        char **argv) {
+    
+    package_hci_message(REQUEST, ALL, 0, 0, 0, 0);
     scu_write();
     clear_tx();
 

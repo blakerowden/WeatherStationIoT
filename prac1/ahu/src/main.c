@@ -133,6 +133,12 @@ SHELL_STATIC_SUBCMD_SET_CREATE(sample_readwrite,
         SHELL_SUBCMD_SET_END
 );
 
+SHELL_STATIC_SUBCMD_SET_CREATE(all_control,
+        SHELL_CMD(o, NULL, "Start reading all sensors", cmd_all_on),
+        SHELL_CMD(f, NULL, "Stop reading all sensors", cmd_all_off),
+        SHELL_SUBCMD_SET_END
+);
+
 
 // Level 0 //
 SHELL_CMD_REGISTER(time, &time_read, "Display elapsed time since power on", cmd_disp_time);
@@ -147,5 +153,6 @@ SHELL_CMD_REGISTER(rgb, &rgb_readwrite, "RGB LED", NULL);
 SHELL_CMD_REGISTER(pb, &pb_readwrite, "Pushbutton state (0 or 1)", NULL);
 SHELL_CMD_REGISTER(dc, &dc_readwrite, "Duty Cycle", NULL);
 SHELL_CMD_REGISTER(sample, &sample_readwrite, "Sample Time", NULL);
+SHELL_CMD_REGISTER(all, &all_control, "Toggle Reading All Devices", NULL);
 
 

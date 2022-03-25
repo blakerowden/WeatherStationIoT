@@ -38,7 +38,8 @@ typedef enum {
     BUZ,
     PB,
     DC,
-    SAMPLE
+    SAMPLE,
+    ALL
 } device_id;
 
 extern uint16_t tx_buff[6];

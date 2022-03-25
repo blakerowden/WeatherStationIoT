@@ -39,4 +39,7 @@ int cmd_dc_write_percentage(const struct shell *, size_t, char **);
 
 int cmd_sample_write_sec(const struct shell *, size_t, char **);
 
+int cmd_all_on(const struct shell *, size_t, char **);
+int cmd_all_off(const struct shell *, size_t, char **);
+
 #endif //SHELL_SCU_H
