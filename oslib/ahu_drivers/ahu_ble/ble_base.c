@@ -28,6 +28,7 @@
 #include "led_driver.h"
 #include "ble_uuid.h"
 #include "shell_scu.h"
+#include "hci_driver.h"
 
 static void gatt_discovery(void);
 static void start_scan(void);
@@ -40,9 +41,7 @@ bool ble_connected;
 
 K_SEM_DEFINE(sem_name, 0, 1);
 
-//TX BUFFER
-uint16_t tx_buff[] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
-uint16_t rx_buff[] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
+
 
 /**
  * @brief Used to parse the advertisement data 
@@ -358,8 +357,6 @@ void thread_ble_led(void)
 
         if (ble_connected)
         {
-            tx_buff[0] = tx_buff[0] + 1;
-            scu_write();
             gpio_pin_set(device_get_binding(LED1), LED1_PIN, (int)led_is_on);
             gpio_pin_set(device_get_binding(LED0), LED0_PIN, (int)false);
             k_msleep(BLE_CONN_SLEEP_MS);

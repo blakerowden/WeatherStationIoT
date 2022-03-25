@@ -17,13 +17,14 @@ include_directories(
 
 #Add Target Sources
 target_sources(app PRIVATE
-                        src/main.c
                         ../../oslib/ahu_drivers/ahu_ble/ble_base.c
                         ../../oslib/ahu_drivers/ahu_shell/shell_base.c
                         ../../oslib/ahu_drivers/ahu_shell/shell_led.c
                         ../../oslib/ahu_drivers/ahu_shell/shell_time.c
                         ../../oslib/ahu_drivers/ahu_shell/shell_scu.c
                         ../../oslib/common/led_driver.c
+                        ../../oslib/common/hci_driver.c
+                        src/main.c
                         )
 
 zephyr_library_include_directories(${ZEPHYR_BASE}/samples/bluetooth)

@@ -68,18 +68,84 @@ K_THREAD_DEFINE(ble_led, THREAD_BLE_LED_STACK, thread_ble_led, NULL, NULL, NULL,
 
 // Shell Commands ==============================================================
 
+// Level 2 //
+SHELL_STATIC_SUBCMD_SET_CREATE(hts221_read,
+        SHELL_CMD(t, NULL, "Read the temperature", cmd_hts221_read_temp),
+        SHELL_CMD(h, NULL, "Read the humidity", cmd_hts221_read_hum),
+        SHELL_SUBCMD_SET_END
+);
+
+SHELL_STATIC_SUBCMD_SET_CREATE(lis2dh_read,
+        SHELL_CMD(x, NULL, "Read the X-Axis", cmd_lis2dh_read_x),
+        SHELL_CMD(y, NULL, "Read the Y-Axis", cmd_lis2dh_read_y),
+        SHELL_CMD(z, NULL, "Read the Z-Axis", cmd_lis2dh_read_z),
+        SHELL_SUBCMD_SET_END
+);
+
 // Level 1 //
 SHELL_STATIC_SUBCMD_SET_CREATE(time_read,
         SHELL_CMD(f, NULL, "Show the time formatted as hours, minutes, seconds..", cmd_disp_format_time),
         SHELL_SUBCMD_SET_END
 );
 
+SHELL_STATIC_SUBCMD_SET_CREATE(hts221_readwrite,
+        SHELL_CMD(r, &hts221_read, "Read", NULL),
+        SHELL_SUBCMD_SET_END
+);
+
+SHELL_STATIC_SUBCMD_SET_CREATE(lps22_readwrite,
+        SHELL_CMD(r, NULL, "Read Pressure", cmd_lps22_read_pres),
+        SHELL_SUBCMD_SET_END
+);
+
+SHELL_STATIC_SUBCMD_SET_CREATE(ccs811_readwrite,
+        SHELL_CMD(r, NULL, "Read VOC", cmd_ccs811_read_voc),
+        SHELL_SUBCMD_SET_END
+);
+
+SHELL_STATIC_SUBCMD_SET_CREATE(lis2dh_readwrite,
+        SHELL_CMD(r, &lis2dh_read, "Read", NULL),
+        SHELL_SUBCMD_SET_END
+);
+
+SHELL_STATIC_SUBCMD_SET_CREATE(buzzer_readwrite,
+        SHELL_CMD(w, NULL, "Write Frequency <freq>", cmd_buzzer_write_freq),
+        SHELL_SUBCMD_SET_END
+);
+
+SHELL_STATIC_SUBCMD_SET_CREATE(rgb_readwrite,
+        SHELL_CMD(w, NULL, "Write <R, G, B>", cmd_rgb_write_rgb),
+        SHELL_SUBCMD_SET_END
+);
+
+SHELL_STATIC_SUBCMD_SET_CREATE(pb_readwrite,
+        SHELL_CMD(r, NULL, "Read", cmd_pb_read_state),
+        SHELL_SUBCMD_SET_END
+);
+
+SHELL_STATIC_SUBCMD_SET_CREATE(dc_readwrite,
+        SHELL_CMD(w, NULL, "Write the duty cycle <percentage on>", cmd_dc_write_percentage),
+        SHELL_SUBCMD_SET_END
+);
+
+SHELL_STATIC_SUBCMD_SET_CREATE(sample_readwrite,
+        SHELL_CMD(w, NULL, "Write the sampling time <sec>", cmd_sample_write_sec),
+        SHELL_SUBCMD_SET_END
+);
+
+
 // Level 0 //
 SHELL_CMD_REGISTER(time, &time_read, "Display elapsed time since power on", cmd_disp_time);
 SHELL_CMD_REGISTER(led, NULL, "Control the AHUs LEDs", cmd_led_control);
 
-SHELL_CMD_REGISTER(hts221, NULL, "Temp/Humidity", cmd_led_control);
-SHELL_CMD_REGISTER(lps22, NULL, "Pressure", cmd_led_control);
-
+SHELL_CMD_REGISTER(hts221, &hts221_readwrite, "Temp/Humidity", NULL);
+SHELL_CMD_REGISTER(lps22, &lps22_readwrite, "Pressure", NULL);
+SHELL_CMD_REGISTER(ccs811, &ccs811_readwrite, "VOC", NULL);
+SHELL_CMD_REGISTER(lis2dh, &lis2dh_readwrite, "XYZ Acceleration", NULL);
+SHELL_CMD_REGISTER(buzzer, &buzzer_readwrite, "buzzer frequency", NULL);
+SHELL_CMD_REGISTER(rgb, &rgb_readwrite, "RGB LED", NULL);
+SHELL_CMD_REGISTER(pb, &pb_readwrite, "Pushbutton state (0 or 1)", NULL);
+SHELL_CMD_REGISTER(dc, &dc_readwrite, "Duty Cycle", NULL);
+SHELL_CMD_REGISTER(sample, &sample_readwrite, "Sample Time", NULL);
 
 
