@@ -37,6 +37,8 @@ typedef enum {
     RGB_LED,
     BUZ,
     PB,
+    DC,
+    SAMPLE
 } device_id;
 
 extern uint16_t tx_buff[6];
