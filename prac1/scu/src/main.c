@@ -24,82 +24,14 @@
 
 #include "scu_sensors.h"
 #include "ble_uuid.h"
-//#include "led_driver.h"
-
-//#include "ble_base.h"
-//#include "led_driver.h"
-//#include "ble_uuid.h"
-//#include "shell_scu.h"
 #include "hci_driver.h"
 
 int m_rec = 0;
 
 //Keeps Track of BLE connection within APP
-bool ble_conencted = false; // ?
+bool ble_conencted = false;
 static struct bt_conn *default_conn;
 static uint16_t rx_handle;
-
-/* Custom Service Variables */
-
-/*
-static struct bt_uuid_128 mobile_uuid = BT_UUID_INIT_128(
-    0xe3, 0x68, 0x4d, 0xe0, 0xa9, 0xcf, 0x11, 0xec,
-    0xb9, 0x09, 0x02, 0x42, 0xac, 0x12, 0x00, 0x02);
-*/
-/*
-static struct bt_uuid_128 node_tx = BT_UUID_INIT_128( 
-    0x2a, 0xae, 0xfc, 0xda, 0xa9, 0xd0, 0x11, 0xec, 
-    0xb9, 0x09, 0x02, 0x42, 0xac, 0x12, 0x00, 0x02);
-
-static struct bt_uuid_128 node_rx = BT_UUID_INIT_128(
-    0x41, 0xbf, 0xbd, 0xba, 0xa9, 0xd0, 0x11, 0xec, 
-    0xb9, 0x09, 0x02, 0x42, 0xac, 0x12, 0x00, 0x02);
-*/
-
-/*
-static struct bt_uuid_128 vnd_enc_uuid = BT_UUID_INIT_128(
-	BT_UUID_128_ENCODE(0x12345678, 0x1234, 0x5678, 0x1234, 0x56789abcdef1));
-*/
-
-//static struct bt_uuid_128 vnd_auth_uuid = BT_UUID_INIT_128(
-	//BT_UUID_128_ENCODE(0x2aaefcda, 0xa9d0, 0x11ec, 0xb909, 0x0242ac120002));
-
-#define VND_MAX_LEN 20
-/*
-static ssize_t read_vnd(struct bt_conn *conn, const struct bt_gatt_attr *attr,
-			void *buf, uint16_t len, uint16_t offset)
-{
-	const char *value = attr->user_data;
-
-	return bt_gatt_attr_read(conn, attr, buf, len, offset, value,
-				 strlen(value));
-}
-
-static ssize_t write_vnd(struct bt_conn *conn, const struct bt_gatt_attr *attr,
-			 const void *buf, uint16_t len, uint16_t offset,
-			 uint8_t flags)
-{
-	uint8_t *value = attr->user_data;
-
-	if (offset + len > VND_MAX_LEN) {
-		return BT_GATT_ERR(BT_ATT_ERR_INVALID_OFFSET);
-	}
-
-	memcpy(value + offset, buf, len);
-	value[offset + len] = 0;
-
-	return len;
-}
-*/
-
-//static uint8_t simulate_vnd;
-
-/*
-static void vnd_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
-{
-	simulate_vnd = (value == BT_GATT_CCC_INDICATE) ? 1 : 0;
-}
-*/
 
 /**
  * @brief Used to parse the GATT service and characteristic data.
@@ -147,8 +79,6 @@ static uint8_t discover_func(struct bt_conn *conn,
 	return BT_GATT_ITER_CONTINUE;
 }
 
-#define VND_LONG_MAX_LEN 74
-
 static void gatt_write_cb(struct bt_conn *conn, uint8_t err,
 			  struct bt_gatt_write_params *params)
 {
@@ -159,25 +89,6 @@ static void gatt_write_cb(struct bt_conn *conn, uint8_t err,
 	(void)memset(params, 0, sizeof(*params));
 
 }
-
-
-//static int signed_value;
-//uint8_t rx_buff[] = {0xAA, 0x01, 0x16, 0xcc, 0xdd};
-//uint8_t rx_buff[] = {0xAA, 0x01, 0x16, 0x00, 0x00};
-//uint16_t rx_buff[] = {0xAA00, 0x0100, 0x1600, 0xBB00, 0xCC00};
-//uint16_t tx_buff[] = {0x1122, 0x3344, 0x5566, 0x7788, 0x99AA};
-
-/*
-static ssize_t read_signed(struct bt_conn *conn, const struct bt_gatt_attr *attr,
-			   void *buf, uint16_t len, uint16_t offset)
-{
-	const char *value = attr->user_data;
-
-	return bt_gatt_attr_read(conn, attr, buf, len, offset, value,
-				 //sizeof(signed_value));
-				 sizeof(tx_buff));
-}
-*/
 
 static ssize_t write_signed(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			    const void *buf, uint16_t len, uint16_t offset,
@@ -208,25 +119,6 @@ static ssize_t read_rx(struct bt_conn *conn,
                              sizeof(rx_buff));
 }
 
-/* Vendor Primary Service Declaration */
-/*
-BT_GATT_SERVICE_DEFINE(vnd_svc, //may be able to change vnd_svc to give service name
-	BT_GATT_PRIMARY_SERVICE(&mobile_uuid), //start primary service here
-	
-	BT_GATT_CHARACTERISTIC(&node_tx.uuid, BT_GATT_CHRC_READ |
-			       BT_GATT_CHRC_WRITE | BT_GATT_CHRC_AUTH,
-			       BT_GATT_PERM_READ | BT_GATT_PERM_WRITE,
-			       //read_signed, write_signed, &signed_value),
-				   read_signed, write_signed, &tx_buff),
-	
-	BT_GATT_CHARACTERISTIC(&node_rx.uuid,
-                                              BT_GATT_CHRC_READ,
-                                              BT_GATT_PERM_READ,
-                                              read_rx, NULL, &rx_buff),
-
-);
-*/
-
 static ssize_t write_tx(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			const void *buf, uint16_t len, uint16_t offset,
 			uint8_t flags)
@@ -239,7 +131,6 @@ static ssize_t write_tx(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 
 	memcpy(value + offset, buf, len);
     //k_sem_give(&sem_name);
-	//scu_sensors_toggle_led(); //!!!!
 	m_rec = 1;
     
 	return len;
@@ -257,8 +148,7 @@ BT_GATT_SERVICE_DEFINE(scu,
 static const struct bt_data ad[] = { 
 	BT_DATA_BYTES(BT_DATA_FLAGS, (BT_LE_AD_GENERAL | BT_LE_AD_NO_BREDR)),
 	BT_DATA_BYTES(BT_DATA_UUID128_ALL, 0xe3, 0x68, 0x4d, 0xe0, 0xa9, 0xcf, 0x11, 0xec,
-                    0xb9, 0x09, 0x02, 0x42, 0xac, 0x12, 0x00, 0x02),
-					//BT_UUID_CUSTOM_SERVICE_VAL), //custom service gets added here
+                    0xb9, 0x09, 0x02, 0x42, 0xac, 0x12, 0x00, 0x02), //node ahu/scu
 };
 
 void mtu_updated(struct bt_conn *conn, uint16_t tx, uint16_t rx)
@@ -310,19 +200,6 @@ static void gatt_discovery(void)
 	}
 }
 
-/*
-static void connected(struct bt_conn *conn, uint8_t err)
-{
-	if (err) {
-		printk("Connection failed (err 0x%02x)\n", err);
-	} else {
-		printk("Connected\n");
-		scu_sensors_toggle_led();
-		gatt_discovery();
-	}
-}
-*/
-
 /**
  * @brief Connection call back
  * 
@@ -362,6 +239,27 @@ static void disconnected(struct bt_conn *conn, uint8_t reason)
 	printk("Disconnected (reason 0x%02x)\n", reason);
 }
 
+/*
+static void disconnected(struct bt_conn *conn, uint8_t reason)
+{
+    char addr[BT_ADDR_LE_STR_LEN];
+
+    if (conn != default_conn)
+    {
+        return;
+    }
+
+    bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
+
+    printk("Disconnected: %s (reason 0x%02x)\n", addr, reason);
+
+    bt_conn_unref(default_conn);
+    default_conn = NULL;
+    ble_connected = false;
+    start_scan();
+}
+*/
+
 BT_CONN_CB_DEFINE(conn_callbacks) = {
 	.connected = connected,
 	.disconnected = disconnected,
@@ -372,8 +270,6 @@ static void bt_ready(void)
 	int err;
 
 	printk("Bluetooth initialized\n");
-
-	//cts_init(); cts disable?
 
 	if (IS_ENABLED(CONFIG_SETTINGS)) {
 		settings_load();
@@ -412,23 +308,6 @@ static struct bt_conn_auth_cb auth_cb_display = {
 	.cancel = auth_cancel,
 };
 
-/*
-void handle_hci_packet() {
-	if (tx_buff[0] = 0xAA12) {
-		//valid
-		int i;
-		for (i = 0; i < 5; i++) {
-			rx_buff[i] = 0xAAAA;
-		}
-	} else {
-		int j;
-		for (j = 0; j < 5; j++) {
-			rx_buff[j] = 0xFFFF;
-		}
-	}
-}
-*/
-
 void main(void)
 {
 	//struct bt_gatt_attr *vnd_ind_attr; //indication
@@ -441,59 +320,22 @@ void main(void)
 		return;
 	}
 
-	bt_set_name("JM CSERVUP");
-	bt_set_name("JM CSERVUP");
+	bt_set_name("JM SCU");
 
 	bt_ready();
 
 	bt_gatt_cb_register(&gatt_callbacks);
 	bt_conn_auth_cb_register(&auth_cb_display);
 
-	//might need this for bluetooth to work
-	/*
-	vnd_ind_attr = bt_gatt_find_by_uuid(vnd_svc.attrs, vnd_svc.attr_count,
-					    &vnd_enc_uuid.uuid);
-	bt_uuid_to_str(&vnd_enc_uuid.uuid, str, sizeof(str));
-	printk("Indicate VND attr %p (UUID %s)\n", vnd_ind_attr, str);
-	*/
-
-	/* Implement notification. At the moment there is no suitable way
-	 * of starting delayed work so we do it here
-	 */
-	//tx_buff[0] = 0;
 	scu_sensors_io_init();
-	//int test;
+
 	while (1) {
 		k_sleep(K_SECONDS(1));
 		//package_hci_message(1, 2, 3, 4, 5);
-
-		//test = scu_sensors_get_button_status();
-		//scu_sensors_toggle_led();
-
-		/*
-		if (test >= 1) { //0
-			//gpio_pin_set_dt(&led, val);
-			scu_sensors_toggle_led();
-		}
-		*/
-		
-		//scu_sensors_get_temp();
-
-		//signed_value = (signed_value + 1) % 20;
-		//tx_buff[0] = (tx_buff[0] + 1) % 20;
-
-		/*
-		if (tx_buff[0] == 0) {
-			rx_buff[0] = 0xAABB;
-		} else {
-			rx_buff[0] = 0xEEFF;
-		}
-		//handle_hci_packet();
-		*/
-		rx_buff[0] = (rx_buff[0] + 1) % 20;
-		ahu_write();
 		scu_sensors_toggle_led();
-		if (m_rec) {
+		if (m_rec == 1) {
+			rx_buff[0] = scu_sensors_get_button_status();
+			ahu_write();
 			m_rec = 0;
 		}
 	}
