@@ -29,9 +29,10 @@
 int m_rec = 0;
 
 //Keeps Track of BLE connection within APP
-bool ble_conencted = false;
+bool ble_connected = false;
 static struct bt_conn *default_conn;
 static uint16_t rx_handle;
+static void start_scan(void);
 
 /**
  * @brief Used to parse the GATT service and characteristic data.
@@ -211,13 +212,13 @@ static void connected(struct bt_conn *conn, uint8_t err)
     if (err)
     {
         printk("Connection failed (err 0x%02x)\n", err);
-        ble_conencted = false;
+        ble_connected = false;
     }
     else
     {   
         default_conn = conn;
         printk("BLE Connected to Device\n");
-        ble_conencted = true;
+        ble_connected = true;
         struct bt_le_conn_param *param = BT_LE_CONN_PARAM(6, 6, 0, 400);
         char addr[BT_ADDR_LE_STR_LEN];
         printk("Connected: %s\n", addr);
@@ -234,12 +235,100 @@ static void connected(struct bt_conn *conn, uint8_t err)
     }
 }
 
+/*
 static void disconnected(struct bt_conn *conn, uint8_t reason)
 {
 	printk("Disconnected (reason 0x%02x)\n", reason);
 }
+*/
 
-/*
+static bool parse_device(struct bt_data *data, void *user_data)
+{
+    bt_addr_le_t *addr = user_data;
+    int i;
+    int matchedCount = 0;
+
+    printk("[AD]: %u data_len %u\n", data->type, data->data_len);
+
+    if (data->type == BT_DATA_UUID128_ALL)
+    {
+
+        uint16_t temp = 0;
+        for (i = 0; i < data->data_len; i++)
+        {
+            temp = data->data[i];
+            if (temp == ble_uuid[i])
+            {
+                matchedCount++;
+            }
+        }
+
+        if (matchedCount == UUID_BUFFER_SIZE)
+        {
+            //MOBILE UUID MATCHED
+            printk("Mobile UUID Found, attempting to connect\n");
+
+            int err = bt_le_scan_stop();
+            k_msleep(10);
+
+            if (err)
+            {
+                printk("Stop LE scan failed (err %d)\n", err);
+                return true;
+            }
+
+            struct bt_le_conn_param *param = BT_LE_CONN_PARAM_DEFAULT;
+
+            err = bt_conn_le_create(addr, BT_CONN_LE_CREATE_CONN,
+                                    param, &default_conn);
+            if (err)
+            {
+                printk("Create conn failed (err %d)\n", err);
+                start_scan();
+            }
+
+            return false;
+        }
+    }
+    return true;
+}
+
+
+static void device_found(const bt_addr_le_t *addr, int8_t rssi, uint8_t type,
+                         struct net_buf_simple *ad)
+{
+
+    if (default_conn)
+    {
+        return;
+    }
+
+    /* We're only interested in connectable events */
+    if (type == BT_GAP_ADV_TYPE_ADV_IND ||
+        type == BT_GAP_ADV_TYPE_ADV_DIRECT_IND)
+    {
+        bt_data_parse(ad, parse_device, (void *)addr);
+    }
+}
+
+/**
+ * @brief Starts passive BLE scanning for nearby
+ *          devices.
+ */
+static void start_scan(void)
+{
+    int err;
+
+    err = bt_le_scan_start(BT_LE_SCAN_PASSIVE, device_found);
+    if (err)
+    {
+        printk("Scanning failed to start (err %d)\n", err);
+        return;
+    }
+
+    printk("Scanning successfully started\n");
+}
+
 static void disconnected(struct bt_conn *conn, uint8_t reason)
 {
     char addr[BT_ADDR_LE_STR_LEN];
@@ -258,7 +347,6 @@ static void disconnected(struct bt_conn *conn, uint8_t reason)
     ble_connected = false;
     start_scan();
 }
-*/
 
 BT_CONN_CB_DEFINE(conn_callbacks) = {
 	.connected = connected,
@@ -334,6 +422,8 @@ void main(void)
 		//package_hci_message(1, 2, 3, 4, 5);
 		scu_sensors_toggle_led();
 		if (m_rec == 1) {
+			printk("[RX]: 0x%X 0x%x 0x%X 0x%x 0x%X 0x%x\n", 
+                tx_buff[0], tx_buff[1], tx_buff[2], tx_buff[3], tx_buff[4], tx_buff[5]);
 			rx_buff[0] = scu_sensors_get_button_status();
 			ahu_write();
 			m_rec = 0;
