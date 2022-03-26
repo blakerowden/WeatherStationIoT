@@ -388,6 +388,7 @@ void main(void)
 	const struct device *ccs = scu_sensors_init(CCS811);
 	const struct device *lis = scu_sensors_init(LIS2DH);
 	const struct device *lps = scu_sensors_init(LPS22HB);
+	const struct device *rgb = get_rgb_led_device();
 
 	scu_sensors_scan(hts, ccs, lis, lps);
 	scu_sensors_io_init();
@@ -472,11 +473,12 @@ void main(void)
 			if (tx_buff[1] == RGB_LED) {
 				
 				scu_sensors_scan(hts, ccs, lis, lps);
-				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 5;
+				set_rgb_led(rgb, tx_buff[2], tx_buff[3], tx_buff[4]);
+				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 7;
 				rx_buff[1] = RGB_LED;
 				rx_buff[2] = tx_buff[2];
-				rx_buff[3] = 0;
-				rx_buff[4] = 0;
+				rx_buff[3] = tx_buff[3];
+				rx_buff[4] = tx_buff[4];
 				rx_buff[5] = 0;
 			}
 			if (tx_buff[1] == BUZ) {

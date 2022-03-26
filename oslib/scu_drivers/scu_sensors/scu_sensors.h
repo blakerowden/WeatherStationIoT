@@ -40,5 +40,7 @@ int scu_sensors_get_pressure(void);
 int scu_sensors_get_button_status(void);
 int scu_sensors_toggle_led(void);
 void scu_sensors_io_init(void);
+const struct device *get_rgb_led_device(void);
+void set_rgb_led(const struct device *dev_hts211, int red, int green, int blue);
 
 #endif //SCU_SENS_H

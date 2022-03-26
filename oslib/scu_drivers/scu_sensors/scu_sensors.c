@@ -19,6 +19,36 @@
 #include <sys/printk.h>
 #include <inttypes.h>
 
+//rgb led
+#include <drivers/gpio/gpio_sx1509b.h>
+
+#define NUMBER_OF_LEDS 3
+
+//#define GREEN_LED DT_GPIO_PIN(DT_NODELABEL(led0), gpios)
+//#define BLUE_LED DT_GPIO_PIN(DT_NODELABEL(led1), gpios)
+//#define RED_LED DT_GPIO_PIN(DT_NODELABEL(led2), gpios)
+
+#define BLUE_LED DT_GPIO_PIN(DT_NODELABEL(led2), gpios)
+#define RED_LED DT_GPIO_PIN(DT_NODELABEL(led0), gpios)
+#define GREEN_LED DT_GPIO_PIN(DT_NODELABEL(led1), gpios)
+
+
+
+
+
+enum sx1509b_color { sx1509b_red = 0, sx1509b_green, sx1509b_blue };
+
+//static struct k_work_delayable rgb_work;
+//static uint8_t which_color = sx1509b_red;
+//static uint8_t iterator;
+
+static const gpio_pin_t rgb_pins[] = {
+	RED_LED,
+	GREEN_LED,
+	BLUE_LED,
+};
+
+
 /*
  * Get button configuration from the devicetree sw0 alias. This is mandatory.
  */
@@ -44,6 +74,34 @@ uint16_t press_buff[] = {0x0000, 0x0000, 0x0000, 0x0000};
 
 int button_val;
 int led_val = 0;
+
+const struct device *get_rgb_led_device(void) {
+	const struct device *dev_sx1509 = device_get_binding(DT_PROP(DT_NODELABEL(sx1509b), label));
+	int err;
+
+	if (dev_sx1509 == NULL) {
+		printk("Error binding SX1509B device\n");
+
+		return NULL;
+	}
+
+	for (int i = 0; i < NUMBER_OF_LEDS; i++) {
+		err = sx1509b_led_intensity_pin_configure(dev_sx1509,
+							  rgb_pins[i]);
+
+		if (err) {
+			printk("Error configuring pin for LED intensity\n");
+		}
+	}
+
+	return dev_sx1509;
+}
+
+void set_rgb_led(const struct device *dev_sx1509, int red, int green, int blue) {
+	sx1509b_led_intensity_pin_set(dev_sx1509, RED_LED, red);
+	sx1509b_led_intensity_pin_set(dev_sx1509, GREEN_LED, green);
+	sx1509b_led_intensity_pin_set(dev_sx1509, BLUE_LED, blue);
+}
 
 static const struct device *get_hts221_device(void) { 
 
@@ -252,8 +310,11 @@ int scu_sensors_get_button_status() {
  * The led0 devicetree alias is optional. If present, we'll use it
  * to turn on the LED whenever the button is pressed.
  */
+
+ /*
 static struct gpio_dt_spec led = GPIO_DT_SPEC_GET_OR(DT_ALIAS(led0), gpios,
 						     {0});
+*/ 
 
 void button_pressed(const struct device *dev, struct gpio_callback *cb,
 		    uint32_t pins)
@@ -262,11 +323,15 @@ void button_pressed(const struct device *dev, struct gpio_callback *cb,
 }
 
 int scu_sensors_toggle_led() {
+	/*
   if(led.port) {
     led_val = 1 - led_val;
     gpio_pin_set_dt(&led, led_val);
   }
-  return button_val;
+  return led_val;
+  */
+  return 0;
+
 }
 
 void scu_sensors_io_init() {
@@ -297,6 +362,7 @@ void scu_sensors_io_init() {
 	gpio_add_callback(button.port, &button_cb_data);
 	printk("Set up button at %s pin %d\n", button.port->name, button.pin);
 
+	/*
 	if (led.port && !device_is_ready(led.port)) {
 		printk("Error %d: LED device %s is not ready; ignoring it\n",
 		       ret, led.port->name);
@@ -312,6 +378,7 @@ void scu_sensors_io_init() {
 			printk("Set up LED at %s pin %d\n", led.port->name, led.pin);
 		}
 	}
+	*/
 }
 
 /*
