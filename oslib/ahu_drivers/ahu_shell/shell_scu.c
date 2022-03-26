@@ -16,6 +16,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Logging Module
+LOG_MODULE_REGISTER(SCU_CMD);
+
 int cmd_hts221_read_temp(const struct shell *shell, size_t argc,
                         char **argv) {
     

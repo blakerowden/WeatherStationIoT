@@ -11,6 +11,9 @@
 
 #include "hci_driver.h"
 
+// Logging Module
+LOG_MODULE_REGISTER(HCI);
+
 uint16_t tx_buff[] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
 uint16_t rx_buff[] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
 

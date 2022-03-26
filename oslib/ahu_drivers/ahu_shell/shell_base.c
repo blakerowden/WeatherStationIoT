@@ -11,6 +11,9 @@
 
 #include "shell_base.h"
 
+// Logging Module
+LOG_MODULE_REGISTER(SHELL_BASE);
+
 #define NO_USB -1
 
 int begin_shell(void) {
