@@ -19,6 +19,36 @@
 #include <sys/printk.h>
 #include <inttypes.h>
 
+//rgb led
+#include <drivers/gpio/gpio_sx1509b.h>
+
+#define NUMBER_OF_LEDS 3
+
+//#define GREEN_LED DT_GPIO_PIN(DT_NODELABEL(led0), gpios)
+//#define BLUE_LED DT_GPIO_PIN(DT_NODELABEL(led1), gpios)
+//#define RED_LED DT_GPIO_PIN(DT_NODELABEL(led2), gpios)
+
+#define BLUE_LED DT_GPIO_PIN(DT_NODELABEL(led2), gpios)
+#define RED_LED DT_GPIO_PIN(DT_NODELABEL(led0), gpios)
+#define GREEN_LED DT_GPIO_PIN(DT_NODELABEL(led1), gpios)
+
+
+
+
+
+enum sx1509b_color { sx1509b_red = 0, sx1509b_green, sx1509b_blue };
+
+//static struct k_work_delayable rgb_work;
+//static uint8_t which_color = sx1509b_red;
+//static uint8_t iterator;
+
+static const gpio_pin_t rgb_pins[] = {
+	RED_LED,
+	GREEN_LED,
+	BLUE_LED,
+};
+
+
 /*
  * Get button configuration from the devicetree sw0 alias. This is mandatory.
  */
@@ -34,8 +64,44 @@ static struct gpio_callback button_cb_data;
 struct sensor_value temp, humidity, voc, acc_x, acc_y, acc_z, pressure; //press,
 struct device *mydev1; //= NULL? 
 
+uint16_t temp_buff[] = {0x0000, 0x0000, 0x0000, 0x0000};
+uint16_t humid_buff[] = {0x0000, 0x0000, 0x0000, 0x0000};
+uint16_t voc_buff[] = {0x0000, 0x0000, 0x0000, 0x0000};
+uint16_t acc_x_buff[] = {0x0000, 0x0000, 0x0000, 0x0000};
+uint16_t acc_y_buff[] = {0x0000, 0x0000, 0x0000, 0x0000};
+uint16_t acc_z_buff[] = {0x0000, 0x0000, 0x0000, 0x0000};
+uint16_t press_buff[] = {0x0000, 0x0000, 0x0000, 0x0000};
+
 int button_val;
 int led_val = 0;
+
+const struct device *get_rgb_led_device(void) {
+	const struct device *dev_sx1509 = device_get_binding(DT_PROP(DT_NODELABEL(sx1509b), label));
+	int err;
+
+	if (dev_sx1509 == NULL) {
+		printk("Error binding SX1509B device\n");
+
+		return NULL;
+	}
+
+	for (int i = 0; i < NUMBER_OF_LEDS; i++) {
+		err = sx1509b_led_intensity_pin_configure(dev_sx1509,
+							  rgb_pins[i]);
+
+		if (err) {
+			printk("Error configuring pin for LED intensity\n");
+		}
+	}
+
+	return dev_sx1509;
+}
+
+void set_rgb_led(const struct device *dev_sx1509, int red, int green, int blue) {
+	sx1509b_led_intensity_pin_set(dev_sx1509, RED_LED, red);
+	sx1509b_led_intensity_pin_set(dev_sx1509, GREEN_LED, green);
+	sx1509b_led_intensity_pin_set(dev_sx1509, BLUE_LED, blue);
+}
 
 static const struct device *get_hts221_device(void) { 
 
@@ -105,7 +171,7 @@ static const struct device *get_lis2dh_device(void) {
 
 static const struct device *get_lps22hb_device(void) { 
 
-	const struct device *dev = DEVICE_DT_GET_ANY(st_lps22hb-press);
+	const struct device *dev = DEVICE_DT_GET_ANY(st_lps22hb_press); //-press
 
 
 	if (dev == NULL) {
@@ -155,18 +221,53 @@ const struct device *dev_lps22hb) {
   
   sensor_sample_fetch(dev_hts211);
   sensor_sample_fetch(dev_ccs811); 
-  //sensor_sample_fetch(dev_lis2dh); 
-  //sensor_sample_fetch(dev_lps22hb);
+  sensor_sample_fetch(dev_lis2dh); 
+  sensor_sample_fetch(dev_lps22hb);
 
   sensor_channel_get(dev_hts211, SENSOR_CHAN_AMBIENT_TEMP, &temp);
   sensor_channel_get(dev_hts211, SENSOR_CHAN_HUMIDITY, &humidity);
   sensor_channel_get(dev_ccs811, SENSOR_CHAN_VOC, &voc);
-  //sensor_channel_get(dev_lis2dh, SENSOR_CHAN_ACCEL_X, &acc_x);
-  //sensor_channel_get(dev_lis2dh, SENSOR_CHAN_ACCEL_Y, &acc_y);
-  //sensor_channel_get(dev_lis2dh, SENSOR_CHAN_ACCEL_Z, &acc_z);
-  //sensor_channel_get(dev_lps22hb, SENSOR_CHAN_PRESS, &pressure);
+  sensor_channel_get(dev_lis2dh, SENSOR_CHAN_ACCEL_X, &acc_x);
+  sensor_channel_get(dev_lis2dh, SENSOR_CHAN_ACCEL_Y, &acc_y);
+  sensor_channel_get(dev_lis2dh, SENSOR_CHAN_ACCEL_Z, &acc_z);
+  sensor_channel_get(dev_lps22hb, SENSOR_CHAN_PRESS, &pressure);
 
   //button_val = gpio_pin_get_dt(&button);
+
+  temp_buff[0] = (temp.val1 >> 16) & 0xFFFF;
+  temp_buff[1] = temp.val1 & 0xFFFF;
+  temp_buff[2] = (temp.val2 >> 16) & 0xFFFF;
+  temp_buff[3] = temp.val2 & 0xFFFF;
+
+  humid_buff[0] = (humidity.val1 >> 16) & 0xFFFF;
+  humid_buff[1] = humidity.val1 & 0xFFFF;
+  humid_buff[2] = (humidity.val2 >> 16) & 0xFFFF;
+  humid_buff[3] = humidity.val2 & 0xFFFF;
+
+  voc_buff[0] = (voc.val1 >> 16) & 0xFFFF;
+  voc_buff[1] = voc.val1 & 0xFFFF;
+  voc_buff[2] = (voc.val2 >> 16) & 0xFFFF;
+  voc_buff[3] = voc.val2 & 0xFFFF;
+
+  acc_x_buff[0] = (acc_x.val1 >> 16) & 0xFFFF;
+  acc_x_buff[1] = acc_x.val1 & 0xFFFF;
+  acc_x_buff[2] = (acc_x.val2 >> 16) & 0xFFFF;
+  acc_x_buff[3] = acc_x.val2 & 0xFFFF;
+
+  acc_y_buff[0] = (acc_y.val1 >> 16) & 0xFFFF;
+  acc_y_buff[1] = acc_y.val1 & 0xFFFF;
+  acc_y_buff[2] = (acc_y.val2 >> 16) & 0xFFFF;
+  acc_y_buff[3] = acc_y.val2 & 0xFFFF;
+
+  acc_z_buff[0] = (acc_z.val1 >> 16) & 0xFFFF;
+  acc_z_buff[1] = acc_z.val1 & 0xFFFF;
+  acc_z_buff[2] = (acc_z.val2 >> 16) & 0xFFFF;
+  acc_z_buff[3] = acc_z.val2 & 0xFFFF;
+
+  press_buff[0] = (pressure.val1 >> 16) & 0xFFFF;
+  press_buff[1] = pressure.val1 & 0xFFFF;
+  press_buff[2] = (pressure.val2 >> 16) & 0xFFFF;
+  press_buff[3] = pressure.val2 & 0xFFFF;
 
 }
 
@@ -209,8 +310,11 @@ int scu_sensors_get_button_status() {
  * The led0 devicetree alias is optional. If present, we'll use it
  * to turn on the LED whenever the button is pressed.
  */
+
+ /*
 static struct gpio_dt_spec led = GPIO_DT_SPEC_GET_OR(DT_ALIAS(led0), gpios,
 						     {0});
+*/ 
 
 void button_pressed(const struct device *dev, struct gpio_callback *cb,
 		    uint32_t pins)
@@ -219,11 +323,15 @@ void button_pressed(const struct device *dev, struct gpio_callback *cb,
 }
 
 int scu_sensors_toggle_led() {
+	/*
   if(led.port) {
     led_val = 1 - led_val;
     gpio_pin_set_dt(&led, led_val);
   }
-  return button_val;
+  return led_val;
+  */
+  return 0;
+
 }
 
 void scu_sensors_io_init() {
@@ -254,6 +362,7 @@ void scu_sensors_io_init() {
 	gpio_add_callback(button.port, &button_cb_data);
 	printk("Set up button at %s pin %d\n", button.port->name, button.pin);
 
+	/*
 	if (led.port && !device_is_ready(led.port)) {
 		printk("Error %d: LED device %s is not ready; ignoring it\n",
 		       ret, led.port->name);
@@ -269,6 +378,7 @@ void scu_sensors_io_init() {
 			printk("Set up LED at %s pin %d\n", led.port->name, led.pin);
 		}
 	}
+	*/
 }
 
 /*
