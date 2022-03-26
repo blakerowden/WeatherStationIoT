@@ -23,6 +23,7 @@
 #define LED0_NODE DT_ALIAS(led0)
 #define LED1_NODE DT_ALIAS(led1)
 #define LED2_NODE DT_ALIAS(led2)
+#define LED3_NODE DT_ALIAS(led3)
 
 /* LED0 */
 
@@ -64,6 +65,20 @@
 #define LED2	""
 #define LED2_PIN	0
 #define LED2_FLAGS	0
+#endif
+
+/* LED3 */
+
+#if DT_NODE_HAS_STATUS(LED3_NODE, okay)
+#define LED3	DT_GPIO_LABEL(LED3_NODE, gpios)
+#define LED3_PIN	DT_GPIO_PIN(LED3_NODE, gpios)
+#define LED3_FLAGS	DT_GPIO_FLAGS(LED3_NODE, gpios)
+#else
+/* A build error here means your board isn't set up to blink an LED. */
+#error "Unsupported board: led3 devicetree alias is not defined"
+#define LED3	""
+#define LED3_PIN	0
+#define LED3_FLAGS	0
 #endif
 
 /* Public Enums --------------------------------------------------------------*/
@@ -187,6 +202,42 @@ int led2_toggle(void);
  */
 
 int led2_deinit(void);
+
+/**
+ * @brief Initialises LED2 to be used as an output
+ * 
+ * @return int 0 on success, negative errno code on failure.
+ */
+int led3_init(void);
+
+/**
+ * @brief Turns LED2 on
+ * 
+ * @return int 0 on success, negative errno code on failure.
+ */
+int led3_on(void);
+
+/**
+ * @brief Turns LED2 off
+ * 
+ * @return int 0 on success, negative errno code on failure.
+ */
+int led3_off(void);
+
+/**
+ * @brief Toggles LED2 on/off
+ * 
+ * @return int 0 on success, negative errno code on failure.
+ */
+int led3_toggle(void);
+
+/**
+ * @brief Deitialises LED2 as an output
+ * 
+ * @return int 0 on success, negative errno code on failure.
+ */
+
+int led3_deinit(void);
 
 /**
  * @brief Used to log an invalid LED command

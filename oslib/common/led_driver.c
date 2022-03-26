@@ -270,6 +270,85 @@ int led2_deinit(void) {
 
 }
 
+/* LED3 Functions */
+
+int led3_init(void) {
+
+    const struct device *dev = device_get_binding(LED3);
+    if (dev == NULL) {
+		return DEV_NOT_FOUND;
+	}
+
+    LOG_DBG("LED3 Initialized");
+    
+    return gpio_pin_configure(dev, LED3_PIN, GPIO_OUTPUT_INACTIVE | LED3_FLAGS);
+}
+
+int led3_on(void) {
+
+    const struct device *dev = device_get_binding(LED3);
+    if (dev == NULL) {
+		return DEV_NOT_INIT;
+	}
+
+    if (led_status(3)) {
+        LOG_WRN("LED3 Already ON");
+    } else {
+        LOG_INF("LED3 is ON");
+    }
+    
+    return gpio_pin_set(dev, LED3_PIN, ON); 
+
+}
+
+int led3_off(void) {
+
+    const struct device *dev = device_get_binding(LED3);
+    if (dev == NULL) {
+		return DEV_NOT_INIT;
+	}
+
+    if (led_status(3)) {
+        LOG_INF("LED3 is OFF");
+    } else {
+        LOG_WRN("LED3 is Already OFF");
+    }
+    
+    return gpio_pin_set(dev, LED3_PIN, OFF); 
+
+}
+
+int led3_toggle(void) {
+
+    const struct device *dev = device_get_binding(LED3);
+    if (dev == NULL) {
+		return DEV_NOT_INIT;
+	}
+
+    if (led_status(3)) {
+        LOG_INF("LED3 is OFF");
+    } else {
+        LOG_INF("LED3 is ON");
+    }
+    
+    return gpio_pin_toggle(dev, LED3_PIN); 
+
+}
+
+
+int led3_deinit(void) {
+
+    const struct device *dev = device_get_binding(LED3);
+    if (dev == NULL) {
+		return DEV_NOT_INIT;
+	}
+
+    LOG_DBG("LED3 Deinitialized OK");
+
+    return gpio_pin_configure(dev, LED3_PIN, GPIO_DISCONNECTED | LED3_FLAGS);
+
+}
+
 bool led_status(int led_no) {
 
     gpio_port_value_t value = 0;
@@ -314,6 +393,18 @@ bool led_status(int led_no) {
             return false;
         }
         break;
+    case 3:
+        dev = device_get_binding(LED3);
+        gpio_pin_configure(dev, LED3_PIN, GPIO_INPUT | LED3_FLAGS);
+        gpio_port_get_raw(dev, &value);
+        if (!(value & (1 << LED3_PIN))) {
+            gpio_pin_configure(dev, LED3_PIN, GPIO_OUTPUT_ACTIVE | LED3_FLAGS);
+            return true;
+        } else {
+            gpio_pin_configure(dev, LED3_PIN, GPIO_OUTPUT_INACTIVE | LED3_FLAGS);
+            return false;
+        }
+        break;
     default:
         return false;
         break;
@@ -332,5 +423,6 @@ void init_leds(void) {
     led0_init();
     led1_init();
     led2_init();
+    led3_init();
     
 }

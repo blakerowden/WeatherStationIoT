@@ -27,7 +27,7 @@ int cmd_led_control(const struct shell *shell, size_t argc,
                     led2_on();
                     return OK;
                 case 'b':
-                    led0_on();
+                    led3_on();
                     return OK;
                 default:
                     no_command();
@@ -42,7 +42,7 @@ int cmd_led_control(const struct shell *shell, size_t argc,
                     led2_off();
                     return OK;
                 case 'b':
-                    led0_off();
+                    led3_off();
                     return OK;
                 default:
                     no_command();
@@ -57,7 +57,7 @@ int cmd_led_control(const struct shell *shell, size_t argc,
                     led2_toggle();
                     return OK;
                 case 'b':
-                    led0_toggle();
+                    led3_toggle();
                     return OK;
                 default:
                     no_command();
