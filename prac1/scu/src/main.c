@@ -91,35 +91,6 @@ static void gatt_write_cb(struct bt_conn *conn, uint8_t err,
 
 }
 
-static ssize_t write_signed(struct bt_conn *conn, const struct bt_gatt_attr *attr,
-			    const void *buf, uint16_t len, uint16_t offset,
-			    uint8_t flags)
-{
-	uint8_t *value = attr->user_data;
-
-	//if (offset + len > sizeof(signed_value)) {
-	if (offset + len > sizeof(tx_buff)) {
-		return BT_GATT_ERR(BT_ATT_ERR_INVALID_OFFSET);
-	}
-
-	memcpy(value + offset, buf, len);
-
-	return len;
-}
-
-static const struct bt_uuid_128 vnd_signed_uuid = BT_UUID_INIT_128(
-	BT_UUID_128_ENCODE(0x41bfbdba, 0xa9d0, 0x11ec, 0xb909, 0x0242ac120002));
-
-static ssize_t read_rx(struct bt_conn *conn,
-                         const struct bt_gatt_attr *attr, void *buf,
-                         uint16_t len, uint16_t offset)
-{
-    const int16_t *value = attr->user_data;
-
-    return bt_gatt_attr_read(conn, attr, buf, len, offset, value,
-                             sizeof(rx_buff));
-}
-
 static ssize_t write_tx(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			const void *buf, uint16_t len, uint16_t offset,
 			uint8_t flags)
@@ -398,8 +369,6 @@ static struct bt_conn_auth_cb auth_cb_display = {
 
 void main(void)
 {
-	//struct bt_gatt_attr *vnd_ind_attr; //indication
-	char str[BT_UUID_STR_LEN]; //gets used in abcdef1
 	int err;
 
 	err = bt_enable(NULL);
@@ -415,16 +384,151 @@ void main(void)
 	bt_gatt_cb_register(&gatt_callbacks);
 	bt_conn_auth_cb_register(&auth_cb_display);
 
+	const struct device *hts = scu_sensors_init(HTS211);
+	const struct device *ccs = scu_sensors_init(CCS811);
+	const struct device *lis = scu_sensors_init(LIS2DH);
+	const struct device *lps = scu_sensors_init(LPS22HB);
+
+	scu_sensors_scan(hts, ccs, lis, lps);
 	scu_sensors_io_init();
 
 	while (1) {
 		k_sleep(K_SECONDS(1));
-		//package_hci_message(1, 2, 3, 4, 5);
-		scu_sensors_toggle_led();
 		if (m_rec == 1) {
-			printk("[RX]: 0x%X 0x%x 0x%X 0x%x 0x%X 0x%x\n", 
-                tx_buff[0], tx_buff[1], tx_buff[2], tx_buff[3], tx_buff[4], tx_buff[5]);
-			rx_buff[0] = scu_sensors_get_button_status();
+
+			//printk("[RX]: 0x%X 0x%x 0x%X 0x%x 0x%X 0x%x\n", 
+                //tx_buff[0], tx_buff[1], tx_buff[2], tx_buff[3], tx_buff[4], tx_buff[5]);
+
+			if (tx_buff[1] == HTS221_T) {
+
+				scu_sensors_scan(hts, ccs, lis, lps);
+				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
+				rx_buff[1] = HTS221_T;
+				rx_buff[2] = temp_buff[0];
+				rx_buff[3] = temp_buff[1];
+				rx_buff[4] = temp_buff[2];
+				rx_buff[5] = temp_buff[3];
+			}
+			if (tx_buff[1] == HTS221_H) {
+				
+				scu_sensors_scan(hts, ccs, lis, lps);
+				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
+				rx_buff[1] = HTS221_H;
+				rx_buff[2] = humid_buff[0];
+				rx_buff[3] = humid_buff[1];
+				rx_buff[4] = humid_buff[2];
+				rx_buff[5] = humid_buff[3];
+			}
+			if (tx_buff[1] == LPS22_AP) {
+				
+				scu_sensors_scan(hts, ccs, lis, lps);
+				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
+				rx_buff[1] = LPS22_AP;
+				rx_buff[2] = press_buff[0];
+				rx_buff[3] = press_buff[1];
+				rx_buff[4] = press_buff[2];
+				rx_buff[5] = press_buff[3];
+			}
+			if (tx_buff[1] == CCS811_VOC) {
+				
+				scu_sensors_scan(hts, ccs, lis, lps);
+				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
+				rx_buff[1] = CCS811_VOC;
+				rx_buff[2] = voc_buff[0];
+				rx_buff[3] = voc_buff[1];
+				rx_buff[4] = voc_buff[2];
+				rx_buff[5] = voc_buff[3];
+			}
+			if (tx_buff[1] == LIS2DH_X_ACC) {
+				
+				scu_sensors_scan(hts, ccs, lis, lps);
+				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
+				rx_buff[1] = LIS2DH_X_ACC;
+				rx_buff[2] = acc_x_buff[0];
+				rx_buff[3] = acc_x_buff[1];
+				rx_buff[4] = acc_x_buff[2];
+				rx_buff[5] = acc_x_buff[3];
+			}
+			if (tx_buff[1] == LIS2DH_Y_ACC) {
+				
+				scu_sensors_scan(hts, ccs, lis, lps);
+				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
+				rx_buff[1] = LIS2DH_Y_ACC;
+				rx_buff[2] = acc_y_buff[0];
+				rx_buff[3] = acc_y_buff[1];
+				rx_buff[4] = acc_y_buff[2];
+				rx_buff[5] = acc_y_buff[3];
+			}
+			if (tx_buff[1] == LIS2DH_Z_ACC) {
+				
+				scu_sensors_scan(hts, ccs, lis, lps);
+				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
+				rx_buff[1] = LIS2DH_Z_ACC;
+				rx_buff[2] = acc_z_buff[0];
+				rx_buff[3] = acc_z_buff[1];
+				rx_buff[4] = acc_z_buff[2];
+				rx_buff[5] = acc_z_buff[3];
+			}
+			if (tx_buff[1] == RGB_LED) {
+				
+				scu_sensors_scan(hts, ccs, lis, lps);
+				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 5;
+				rx_buff[1] = RGB_LED;
+				rx_buff[2] = tx_buff[2];
+				rx_buff[3] = 0;
+				rx_buff[4] = 0;
+				rx_buff[5] = 0;
+			}
+			if (tx_buff[1] == BUZ) {
+				
+				scu_sensors_scan(hts, ccs, lis, lps);
+				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 5;
+				rx_buff[1] = BUZ;
+				rx_buff[2] = tx_buff[2];
+				rx_buff[3] = 0;
+				rx_buff[4] = 0;
+				rx_buff[5] = 0;
+			}
+			if (tx_buff[1] == PB) {
+				
+				scu_sensors_scan(hts, ccs, lis, lps);
+				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 5;
+				rx_buff[1] = PB;
+				rx_buff[2] = scu_sensors_get_button_status();
+				rx_buff[3] = 0;
+				rx_buff[4] = 0;
+				rx_buff[5] = 0;
+			}
+			if (tx_buff[1] == DC) { //duty cycle
+				
+				scu_sensors_scan(hts, ccs, lis, lps);
+				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 5;
+				rx_buff[1] = DC;
+				rx_buff[2] = tx_buff[2];
+				rx_buff[3] = 0;
+				rx_buff[4] = 0;
+				rx_buff[5] = 0;
+			}
+			if (tx_buff[1] == SAMPLE) {
+				scu_sensors_scan(hts, ccs, lis, lps);
+				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 5;
+				rx_buff[1] = SAMPLE;
+				rx_buff[2] = tx_buff[2];
+				rx_buff[3] = 0;
+				rx_buff[4] = 0;
+				rx_buff[5] = 0;
+				
+			}
+			if (tx_buff[1] == ALL) {
+				
+				scu_sensors_scan(hts, ccs, lis, lps);
+				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 5;
+				rx_buff[1] = ALL;
+				rx_buff[2] = tx_buff[2];
+				rx_buff[3] = 0;
+				rx_buff[4] = 0;
+				rx_buff[5] = 0;
+			}
 			ahu_write();
 			m_rec = 0;
 		}

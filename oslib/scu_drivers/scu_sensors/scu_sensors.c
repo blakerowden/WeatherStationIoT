@@ -34,6 +34,14 @@ static struct gpio_callback button_cb_data;
 struct sensor_value temp, humidity, voc, acc_x, acc_y, acc_z, pressure; //press,
 struct device *mydev1; //= NULL? 
 
+uint16_t temp_buff[] = {0x0000, 0x0000, 0x0000, 0x0000};
+uint16_t humid_buff[] = {0x0000, 0x0000, 0x0000, 0x0000};
+uint16_t voc_buff[] = {0x0000, 0x0000, 0x0000, 0x0000};
+uint16_t acc_x_buff[] = {0x0000, 0x0000, 0x0000, 0x0000};
+uint16_t acc_y_buff[] = {0x0000, 0x0000, 0x0000, 0x0000};
+uint16_t acc_z_buff[] = {0x0000, 0x0000, 0x0000, 0x0000};
+uint16_t press_buff[] = {0x0000, 0x0000, 0x0000, 0x0000};
+
 int button_val;
 int led_val = 0;
 
@@ -105,7 +113,7 @@ static const struct device *get_lis2dh_device(void) {
 
 static const struct device *get_lps22hb_device(void) { 
 
-	const struct device *dev = DEVICE_DT_GET_ANY(st_lps22hb-press);
+	const struct device *dev = DEVICE_DT_GET_ANY(st_lps22hb_press); //-press
 
 
 	if (dev == NULL) {
@@ -155,18 +163,53 @@ const struct device *dev_lps22hb) {
   
   sensor_sample_fetch(dev_hts211);
   sensor_sample_fetch(dev_ccs811); 
-  //sensor_sample_fetch(dev_lis2dh); 
-  //sensor_sample_fetch(dev_lps22hb);
+  sensor_sample_fetch(dev_lis2dh); 
+  sensor_sample_fetch(dev_lps22hb);
 
   sensor_channel_get(dev_hts211, SENSOR_CHAN_AMBIENT_TEMP, &temp);
   sensor_channel_get(dev_hts211, SENSOR_CHAN_HUMIDITY, &humidity);
   sensor_channel_get(dev_ccs811, SENSOR_CHAN_VOC, &voc);
-  //sensor_channel_get(dev_lis2dh, SENSOR_CHAN_ACCEL_X, &acc_x);
-  //sensor_channel_get(dev_lis2dh, SENSOR_CHAN_ACCEL_Y, &acc_y);
-  //sensor_channel_get(dev_lis2dh, SENSOR_CHAN_ACCEL_Z, &acc_z);
-  //sensor_channel_get(dev_lps22hb, SENSOR_CHAN_PRESS, &pressure);
+  sensor_channel_get(dev_lis2dh, SENSOR_CHAN_ACCEL_X, &acc_x);
+  sensor_channel_get(dev_lis2dh, SENSOR_CHAN_ACCEL_Y, &acc_y);
+  sensor_channel_get(dev_lis2dh, SENSOR_CHAN_ACCEL_Z, &acc_z);
+  sensor_channel_get(dev_lps22hb, SENSOR_CHAN_PRESS, &pressure);
 
   //button_val = gpio_pin_get_dt(&button);
+
+  temp_buff[0] = (temp.val1 >> 16) & 0xFFFF;
+  temp_buff[1] = temp.val1 & 0xFFFF;
+  temp_buff[2] = (temp.val2 >> 16) & 0xFFFF;
+  temp_buff[3] = temp.val2 & 0xFFFF;
+
+  humid_buff[0] = (humidity.val1 >> 16) & 0xFFFF;
+  humid_buff[1] = humidity.val1 & 0xFFFF;
+  humid_buff[2] = (humidity.val2 >> 16) & 0xFFFF;
+  humid_buff[3] = humidity.val2 & 0xFFFF;
+
+  voc_buff[0] = (voc.val1 >> 16) & 0xFFFF;
+  voc_buff[1] = voc.val1 & 0xFFFF;
+  voc_buff[2] = (voc.val2 >> 16) & 0xFFFF;
+  voc_buff[3] = voc.val2 & 0xFFFF;
+
+  acc_x_buff[0] = (acc_x.val1 >> 16) & 0xFFFF;
+  acc_x_buff[1] = acc_x.val1 & 0xFFFF;
+  acc_x_buff[2] = (acc_x.val2 >> 16) & 0xFFFF;
+  acc_x_buff[3] = acc_x.val2 & 0xFFFF;
+
+  acc_y_buff[0] = (acc_y.val1 >> 16) & 0xFFFF;
+  acc_y_buff[1] = acc_y.val1 & 0xFFFF;
+  acc_y_buff[2] = (acc_y.val2 >> 16) & 0xFFFF;
+  acc_y_buff[3] = acc_y.val2 & 0xFFFF;
+
+  acc_z_buff[0] = (acc_z.val1 >> 16) & 0xFFFF;
+  acc_z_buff[1] = acc_z.val1 & 0xFFFF;
+  acc_z_buff[2] = (acc_z.val2 >> 16) & 0xFFFF;
+  acc_z_buff[3] = acc_z.val2 & 0xFFFF;
+
+  press_buff[0] = (pressure.val1 >> 16) & 0xFFFF;
+  press_buff[1] = pressure.val1 & 0xFFFF;
+  press_buff[2] = (pressure.val2 >> 16) & 0xFFFF;
+  press_buff[3] = pressure.val2 & 0xFFFF;
 
 }
 
