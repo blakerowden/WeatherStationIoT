@@ -26,6 +26,39 @@
 #include "ble_uuid.h"
 #include "hci_driver.h"
 
+#include <device.h>
+#include <drivers/pwm.h>
+
+#include <pm/pm.h>
+#include <pm/device.h>
+#include <pm/device_runtime.h>
+#include <pm/state.h>
+//#include <include/pm/device.h>
+
+/*
+#define PWM_LED0_NODE	DT_ALIAS(pwm-audio)
+
+#if DT_NODE_HAS_STATUS(PWM_LED0_NODE, okay)
+#define PWM_CTLR	DT_PWMS_CTLR(PWM_LED0_NODE)
+#define PWM_CHANNEL	DT_PWMS_CHANNEL(PWM_LED0_NODE)
+#define PWM_FLAGS	DT_PWMS_FLAGS(PWM_LED0_NODE)
+#else
+#error "Unsupported board: pwm-led0 devicetree alias is not defined"
+#define PWM_CTLR	DT_INVALID_NODE
+#define PWM_CHANNEL	0
+#define PWM_FLAGS	0
+#endif
+*/
+
+
+#if DT_NODE_HAS_STATUS(DT_ALIAS(pwmaudio), okay)
+#define PWM_DRIVER  DT_PWMS_CTLR(DT_ALIAS(pwmaudio))
+//#define PWM_CHANNEL DT_PWMS_CHANNEL(DT_ALIAS(pwmaudio))
+//#define PWM_FLAGS	DT_PWMS_FLAGS(DT_ALIAS(pwmaudio))
+#else
+#error "Choose a supported PWM driver"
+#endif
+
 int m_rec = 0;
 
 //Keeps Track of BLE connection within APP
@@ -369,6 +402,28 @@ static struct bt_conn_auth_cb auth_cb_display = {
 
 void main(void)
 {
+	
+	struct device *pwm_dev;
+	//64_t cycles;
+	/*
+    pwm_dev = device_get_binding(PWM_DRIVER);
+    if (!pwm_dev) {
+       printk("Cannot find %s!\n", PWM_DRIVER);
+       return;
+    }  
+	//pwm_get_cycles_per_sec(pwm_dev, PWM_CHANNEL, &cycles);
+	*/
+
+	/*
+	pwm_dev = DEVICE_DT_GET(PWM_DRIVER);
+	if (!device_is_ready(pwm_dev)) {
+		printk("Error: PWM device %s is not ready\n", pwm_dev->name);
+		return;
+	}
+	*/
+	
+	
+
 	int err;
 
 	err = bt_enable(NULL);
@@ -394,8 +449,31 @@ void main(void)
 	scu_sensors_io_init();
 
 	while (1) {
+		
+		/*
+		if (pwm_pin_set_usec(pwm_dev, PWM_CHANNEL, 1000*50, 1000*50 / 2U, PWM_FLAGS)) {
+			printk("pwm pin set fails\n");
+			//return;
+		}
+
+		k_sleep(K_SECONDS(1));
+		
+		if (pwm_pin_set_usec(pwm_dev, PWM_CHANNEL, 1000*50, 0, PWM_FLAGS)) {
+			printk("pwm off fails\n");
+			//return;
+		}
+		*/
+		
+
+
 		k_sleep(K_SECONDS(1));
 		if (m_rec == 1) {
+
+			pm_device_action_run(hts, PM_DEVICE_ACTION_RESUME);
+			pm_device_action_run(ccs, PM_DEVICE_ACTION_RESUME);
+			pm_device_action_run(lis, PM_DEVICE_ACTION_RESUME);
+			pm_device_action_run(lps, PM_DEVICE_ACTION_RESUME);
+			pm_device_action_run(rgb, PM_DEVICE_ACTION_RESUME);
 
 			//printk("[RX]: 0x%X 0x%x 0x%X 0x%x 0x%X 0x%x\n", 
                 //tx_buff[0], tx_buff[1], tx_buff[2], tx_buff[3], tx_buff[4], tx_buff[5]);
@@ -533,6 +611,19 @@ void main(void)
 			}
 			ahu_write();
 			m_rec = 0;
+			pm_device_action_run(hts, PM_DEVICE_ACTION_SUSPEND);
+			pm_device_action_run(ccs, PM_DEVICE_ACTION_SUSPEND);
+			pm_device_action_run(lis, PM_DEVICE_ACTION_SUSPEND);
+			pm_device_action_run(lps, PM_DEVICE_ACTION_SUSPEND);
+			pm_device_action_run(rgb, PM_DEVICE_ACTION_SUSPEND);
+			/*
+			hts = scu_sensors_init(HTS211);
+	const struct device *ccs = scu_sensors_init(CCS811);
+	const struct device *lis = scu_sensors_init(LIS2DH);
+	const struct device *lps = scu_sensors_init(LPS22HB);
+	const struct device *rgb = get_rgb_led_device();
+
+*/
 		}
 	}
 }
