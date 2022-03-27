@@ -13,6 +13,9 @@
 
 #define OK 0
 
+// Logging Module
+LOG_MODULE_REGISTER(SHELL_TIME);
+
 /**
  * @brief Display the system uptime in seconds
  * 

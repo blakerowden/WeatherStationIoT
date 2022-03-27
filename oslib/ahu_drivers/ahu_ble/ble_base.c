@@ -247,6 +247,8 @@ void scu_write(void)
 	write_params.handle = tx_handle;
 
 	err = bt_gatt_write(default_conn, &write_params);
+    LOG_DBG("[TX]: 0x%X 0x%X 0x%X 0x%X 0x%X\n", 
+                tx_buff[0], tx_buff[1], tx_buff[2], tx_buff[3], tx_buff[4]);
 	if (err != 0) {
 		LOG_ERR("bt_gatt_write failed: %d\n", err);
 	}
@@ -392,12 +394,16 @@ static ssize_t write_rx(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 	return len;
 }
 
+/**
+ * @brief Process incoming data from the SCU RX GATT attribute.
+ * 
+ */
 void process_rx_data(void) {
      
      while(1) {
         
         if (!k_sem_take(&sem_name, K_FOREVER)) {
-            LOG_DBG("[RX]: 0x%X 0x%x 0x%X 0x%x 0x%X\n", 
+            LOG_INF("[RAW RX]: 0x%X 0x%X 0x%X 0x%X 0x%X\n", 
                 rx_buff[0], rx_buff[1], rx_buff[2], rx_buff[3], rx_buff[4]);
         }
             

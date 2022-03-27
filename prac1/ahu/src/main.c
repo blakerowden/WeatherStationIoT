@@ -25,10 +25,13 @@
 #include "shell_scu.h"
 #include "ble_base.h"
 
-#define DEBUG_BLE_LED 1
+// Debug Settings ==============================================================
+#define DEBUG_BLE_LED 0
 
-// Logging Module
-LOG_MODULE_REGISTER(main);
+// Logging Module ==============================================================
+LOG_MODULE_REGISTER(log_main);
+
+// Functions ===================================================================
 
 /**
  * @brief Initialises the hardware and shell
@@ -37,8 +40,7 @@ LOG_MODULE_REGISTER(main);
 void initialise(void) {   
 
     init_leds();
-    begin_shell();
-    
+    begin_shell();  
 }
 
 
