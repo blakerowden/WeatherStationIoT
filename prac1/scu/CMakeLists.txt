@@ -8,11 +8,13 @@ project(peripheral)
 
 include_directories(
                         ../../oslib/scu_drivers/scu_sensors
+                        ../../oslib/scu_drivers/scu_ble
                         ../../oslib/common/
                         )
 
 target_sources(app PRIVATE
   src/main.c
   ../../oslib/scu_drivers/scu_sensors/scu_sensors.c
-  ../../oslib/common//hci_driver.c
+  ../../oslib/scu_drivers/scu_ble/scu_ble.c
+  ../../oslib/common/hci_driver.c
 )
