@@ -24,6 +24,7 @@
 #include "shell_led.h"
 #include "shell_scu.h"
 #include "ble_base.h"
+#include "pb_driver.h"
 
 // Debug Settings ==============================================================
 #define DEBUG_BLE_LED 0
@@ -40,6 +41,7 @@ LOG_MODULE_REGISTER(log_main);
 void initialise(void) {   
 
     init_leds();
+    setup_pb();
     begin_shell();  
 }
 

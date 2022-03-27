@@ -1,6 +1,7 @@
 import paho.mqtt.client as mqtt
 import time
 import argparse
+import serial
 
 def publish(client, topic, message):
     client.publish(topic, message)
@@ -20,6 +21,14 @@ def on_disconnect(client, userdata, rc):
 
 def on_message(client, userdata, message):
     print (message.payload)
+
+def test_dongle(args):
+    ser = serial.Serial('/dev/ttyACM0')  # open serial port
+    print(ser.name)         # check which port was really used
+    ser.write(b'pb r')     # write a string
+    line = ser.readline()  # read a '\n' terminated line
+    print(line)
+    ser.close()             # close port
 
 def main(args):
     client = mqtt.Client()

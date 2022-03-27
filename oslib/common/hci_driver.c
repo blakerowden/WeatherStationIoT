@@ -12,13 +12,15 @@
 #include "hci_driver.h"
 
 // Logging Module
-LOG_MODULE_REGISTER(HCI, LOG_LEVEL_DBG);
+LOG_MODULE_REGISTER(HCI, LOG_LEVEL_ERR);
 
 uint16_t tx_buff[] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
 uint16_t rx_buff[] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
 
+uint8_t stream_freq = 5;
+uint8_t all_active = 0;
+
 uint8_t get_data_length(uint16_t data1, uint16_t data2, uint16_t data3, uint16_t data4) {
-    
     
     if (data4 & 0xFF00) {
         return 8;

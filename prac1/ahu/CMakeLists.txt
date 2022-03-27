@@ -24,6 +24,7 @@ target_sources(app PRIVATE
                         ../../oslib/ahu_drivers/ahu_shell/shell_scu.c
                         ../../oslib/common/led_driver.c
                         ../../oslib/common/hci_driver.c
+                        ../../oslib/common/pb_driver.c
                         src/main.c
                         )
 

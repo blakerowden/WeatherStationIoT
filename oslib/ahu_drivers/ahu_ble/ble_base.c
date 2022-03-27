@@ -37,12 +37,30 @@ static uint16_t tx_handle;
 static struct bt_conn *default_conn;
 
 // Logging Module
-LOG_MODULE_REGISTER(BLE);
+LOG_MODULE_REGISTER(BLE, LOG_LEVEL_ERR);
 
 //BLE Connection Flag
 bool ble_connected;
 
 K_SEM_DEFINE(sem_name, 0, 1);
+
+/**
+ * @brief Process incoming data from the SCU RX GATT attribute.
+ * 
+ */
+void process_rx_data(void) {
+     
+     while(1) {
+        
+        if (!k_sem_take(&sem_name, K_FOREVER)) {
+            LOG_INF("[RAW RX]: 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X\n", 
+                rx_buff[0], rx_buff[1], rx_buff[2], rx_buff[3], rx_buff[4], rx_buff[5]);
+            printk(" { %i ,[ %i , %i , %i , %i ] } \n", rx_buff[1], rx_buff[2], rx_buff[3], rx_buff[4], rx_buff[5]);
+        }
+            
+    }
+
+}
 
 /**
  * @brief Used to parse the advertisement data 
@@ -393,24 +411,6 @@ static ssize_t write_rx(struct bt_conn *conn, const struct bt_gatt_attr *attr,
     
 	return len;
 }
-
-/**
- * @brief Process incoming data from the SCU RX GATT attribute.
- * 
- */
-void process_rx_data(void) {
-     
-     while(1) {
-        
-        if (!k_sem_take(&sem_name, K_FOREVER)) {
-            LOG_INF("[RAW RX]: 0x%X 0x%X 0x%X 0x%X 0x%X\n", 
-                rx_buff[0], rx_buff[1], rx_buff[2], rx_buff[3], rx_buff[4]);
-        }
-            
-    }
-
-}
-
 
 /**
  * @brief Initialize the SCU GATT attributes.
