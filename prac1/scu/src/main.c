@@ -29,10 +29,10 @@
 #include <device.h>
 #include <drivers/pwm.h>
 
-#include <pm/pm.h>
-#include <pm/device.h>
-#include <pm/device_runtime.h>
-#include <pm/state.h>
+//#include <pm/pm.h>
+//#include <pm/device.h>
+//#include <pm/device_runtime.h>
+//#include <pm/state.h>
 
 //set(DTC_OVERLAY_FILE pwm.overlay) //Cmakelists
 /*
