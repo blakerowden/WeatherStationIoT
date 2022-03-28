@@ -1,10 +1,7 @@
-import paho.mqtt.client as mqtt
 import time
-import argparse
 import serial
 import select
 import re
-import time
 
 def test_dongle():
     ser = serial.Serial('/dev/ttyACM0', 115200, timeout = 1)  # open serial port
@@ -16,7 +13,7 @@ def test_dongle():
         time.sleep(1)
         read_data = ser.read(0xFFF)
         result = re.search(' { (.*?) } ', str(read_data))
-        if result != None:
+        if result is not None:
             print(f"\u007b{result.group(1)}\u007d")
     ser.close()             # close port
 

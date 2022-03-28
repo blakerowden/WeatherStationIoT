@@ -71,3 +71,10 @@ _deps
 
 #VSCode fluff
 *.json
+
+#Trunk Linter
+.trunk/**
+.flake8
+.isort.cfg
+.markdownlint.yaml
+.shellcheckrc
