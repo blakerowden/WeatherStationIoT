@@ -25,13 +25,13 @@
 #define BLE_DISC_SLEEP_MS 250
 #define BLE_CONN_SLEEP_MS 1000
 
+extern struct k_sem sem_data_arrived;
+
 //GATT CHARACTERISTIC VALUES
 
 void thread_ble_led(void);
 
 void thread_ble_base(void);
-
-void process_rx_data(void);
 
 /**
  * @brief Write data to the SCU TX GATT attribute.

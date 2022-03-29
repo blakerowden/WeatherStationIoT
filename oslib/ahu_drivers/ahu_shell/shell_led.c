@@ -13,9 +13,10 @@
 
 #include "shell_time.h"
 #include "led_driver.h"
+#include "log_driver.h"
 
 // Logging Module
-LOG_MODULE_REGISTER(SHELL_LED);
+LOG_MODULE_REGISTER(SHELL_LED, INITIAL_SHELL_LED_LOG_LEVEL);
 
 int cmd_led_control(const struct shell *shell, size_t argc,
                         char **argv) {

@@ -10,11 +10,12 @@
  */
 
 #include "shell_time.h"
+#include "log_driver.h"
 
 #define OK 0
 
 // Logging Module
-LOG_MODULE_REGISTER(SHELL_TIME);
+LOG_MODULE_REGISTER(SHELL_TIME, INITIAL_SHELL_TIME_LOG_LEVEL);
 
 /**
  * @brief Display the system uptime in seconds

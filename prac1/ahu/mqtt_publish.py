@@ -1,7 +1,10 @@
-import paho.mqtt.client as mqtt
 import time
-import argparse
 import serial
+import re
+import json
+import paho.mqtt.client as mqtt
+
+ser = serial.Serial('/dev/ttyACM0', 115200, timeout = 1)
 
 def publish(client, topic, message):
     client.publish(topic, message)
@@ -22,34 +25,35 @@ def on_disconnect(client, userdata, rc):
 def on_message(client, userdata, message):
     print (message.payload)
 
-def test_dongle(args):
-    ser = serial.Serial('/dev/ttyACM0')  # open serial port
+def test_dongle(client):
+    print(ser.readline())
     print(ser.name)         # check which port was really used
-    ser.write(b'pb r')     # write a string
-    line = ser.readline()  # read a '\n' terminated line
-    print(line)
-    ser.close()             # close port
+    time.sleep(1)
+    while(1):
+        result = re.search('{ (.*?) }', str(ser.readline()))
+        parse_JSON = ""
+        if result is not None:
+            parse_JSON = "{ " + result.group(1) + " }"
+            print (parse_JSON)
+            data = json.loads(parse_JSON)
+            for i in data :
+                publish(client, topic=i, message=data[i])
+    ser.close()         
 
-def main(args):
+def main():
+      # open serial port
     client = mqtt.Client()
     client.on_connect = on_connect
     client.on_disconnect = on_disconnect
     client.on_message = on_message
-        
-    if args.verbose:
-        client.on_log = on_log
-    print ("connecting to broker", args.host)
-    client.connect(args.host, args.port)
-    time.sleep(5)
-    client.subscribe(args.topic)
-    client.loop_forever()
+    client.on_log = on_log
+    print ("connecting to broker", 'localhost')
+    client.connect('localhost', 1885)
+    #client.subscribe(args.topic)
+    #client.loop_forever()
+    test_dongle(client)
+    
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-v', action='store_true', dest='verbose', required=False)
-    parser.add_argument('-H', action='store', dest='host', required=False, default="localhost")
-    parser.add_argument('-p', action='store', dest='port', type=int, required=False, default="1883")
-    parser.add_argument('-t', action='store', dest='topic', required=True)
-    args = parser.parse_args()
-
-    main(args)
+    
+    main()

@@ -12,12 +12,13 @@
 #include "shell_scu.h"
 #include "ble_base.h"
 #include "hci_driver.h"
+#include "log_driver.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 // Logging Module
-LOG_MODULE_REGISTER(SCU_CMD);
+LOG_MODULE_REGISTER(SCU_CMD, INITIAL_SHELL_SCU_LOG_LEVEL);
 
 int cmd_hts221_read_temp(const struct shell *shell, size_t argc,
                         char **argv) {

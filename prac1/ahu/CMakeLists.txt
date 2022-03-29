@@ -12,12 +12,14 @@ project(ahu)
 include_directories(
                         ../../oslib/ahu_drivers/ahu_ble
                         ../../oslib/ahu_drivers/ahu_shell
+                        ../../oslib/ahu_drivers/ahu_data
                         ../../oslib/common
                         )
 
 #Add Target Sources
 target_sources(app PRIVATE
                         ../../oslib/ahu_drivers/ahu_ble/ble_base.c
+                        ../../oslib/ahu_drivers/ahu_data/ahu_data.c
                         ../../oslib/ahu_drivers/ahu_shell/shell_base.c
                         ../../oslib/ahu_drivers/ahu_shell/shell_led.c
                         ../../oslib/ahu_drivers/ahu_shell/shell_time.c

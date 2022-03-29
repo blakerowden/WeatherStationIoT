@@ -10,9 +10,10 @@
  */
 
 #include "shell_base.h"
+#include "log_driver.h"
 
 // Logging Module
-LOG_MODULE_REGISTER(SHELL_BASE);
+LOG_MODULE_REGISTER(SHELL_BASE, INITIAL_SHELL_BASE_LOG_LEVEL);
 
 #define NO_USB -1
 
