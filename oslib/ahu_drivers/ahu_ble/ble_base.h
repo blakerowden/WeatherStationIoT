@@ -1,11 +1,13 @@
 /**
-  ******************************************************************************
-  * @file   : ble_base.h
-  * @brief  : 
-  ******************************************************************************
-  * @author Blake Rowden
-  * ***************************************************************************
-  */
+ * @file ble_base.h
+ * @author your name (you@domain.com)
+ * @brief 
+ * @version 0.1
+ * @date 2022-03-29
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 
 #ifndef BLE_BASE_H
 #define BLE_BASE_H
@@ -27,7 +29,7 @@
 
 extern struct k_sem sem_data_arrived;
 
-//GATT CHARACTERISTIC VALUES
+// GATT CHARACTERISTIC VALUES
 
 void thread_ble_led(void);
 
@@ -35,10 +37,8 @@ void thread_ble_base(void);
 
 /**
  * @brief Write data to the SCU TX GATT attribute.
- * 
+ *
  */
 void scu_write(void);
 
-
-
-#endif //BLE_BASE_H
+#endif // BLE_BASE_H

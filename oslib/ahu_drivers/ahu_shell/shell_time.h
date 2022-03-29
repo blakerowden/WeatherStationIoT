@@ -4,9 +4,9 @@
  * @brief Shell Time library built for the CSSE4011 Practical 1
  * @version 0.1
  * @date 2022-03-15
- * 
+ *
  * @copyright Copyright (c) 2022
- * 
+ *
  */
 #include <zephyr.h>
 #include <device.h>
@@ -21,4 +21,4 @@
 int cmd_disp_time(const struct shell *, size_t, char **);
 int cmd_disp_format_time(const struct shell *, size_t, char **);
 
-#endif //SHELL_TIME_H
+#endif // SHELL_TIME_H

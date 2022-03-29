@@ -9,8 +9,10 @@ from queue import *
 SHORTSLEEP = 1
 BAUDRATE = 115200
 
+
 def publish(client, topic, message):
     client.publish(topic, message)
+
 
 def on_log(client, userdata, level, buf):
     print("log: " + buf)

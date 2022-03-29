@@ -29,32 +29,40 @@ static const struct gpio_dt_spec button =
 static struct gpio_callback button_cb_data;
 
 void button_pressed(const struct device *dev, struct gpio_callback *cb,
-                    uint32_t pins) {
-  if (all_active) {
+                    uint32_t pins)
+{
+  if (all_active)
+  {
     cmd_all_off(NULL, 0, NULL);
-  } else {
+  }
+  else
+  {
     cmd_all_on(NULL, 0, NULL);
   }
   all_active = !all_active;
 }
 
-void setup_pb(void) {
+void setup_pb(void)
+{
   int ret;
 
-  if (!device_is_ready(button.port)) {
+  if (!device_is_ready(button.port))
+  {
     printk("Error: button device %s is not ready\n", button.port->name);
     return;
   }
 
   ret = gpio_pin_configure_dt(&button, GPIO_INPUT);
-  if (ret != 0) {
+  if (ret != 0)
+  {
     printk("Error %d: failed to configure %s pin %d\n", ret, button.port->name,
            button.pin);
     return;
   }
 
   ret = gpio_pin_interrupt_configure_dt(&button, GPIO_INT_EDGE_TO_ACTIVE);
-  if (ret != 0) {
+  if (ret != 0)
+  {
     printk("Error %d: failed to configure interrupt on %s pin %d\n", ret,
            button.port->name, button.pin);
     return;

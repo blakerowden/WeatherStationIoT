@@ -4,9 +4,9 @@
  * @brief Shell LED library built for the CSSE4011 Practical 1
  * @version 0.1
  * @date 2022-03-15
- * 
+ *
  * @copyright Copyright (c) 2022
- * 
+ *
  */
 #include <zephyr.h>
 #include <device.h>
@@ -20,4 +20,4 @@
 
 int cmd_led_control(const struct shell *, size_t, char **);
 
-#endif //SHELL_LED_H
+#endif // SHELL_LED_H
