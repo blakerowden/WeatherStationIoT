@@ -176,9 +176,9 @@ void JSON_thread(void)
     {
         if (all_active)
         {
-            printk("{\"1\":%i,\"2\":%i,\"3\":%i,\"4\":%i,\"5\":%i,\"6\":%i,\"7\":%i,\"8\":[%i,%i,%i],\"9\":%i,\"10\":%i}\n",
+            printk("{ \"1\" :%i, \"2\" :%i, \"3\" :%i, \"4\" :%i, \"5\" :%i, \"6\" :%i, \"7\" :%i, \"8\" :%i, \"9\" :%i, \"10\" :%i }\n",
                    ahu_data.temp, ahu_data.humidity, ahu_data.air_pressure, ahu_data.VOC, ahu_data.X, ahu_data.Y, ahu_data.Z,
-                   ahu_data.rgb[0], ahu_data.rgb[1], ahu_data.rgb[2], ahu_data.buzzer, ahu_data.push_button);
+                   ahu_data.rgb[0], ahu_data.buzzer, ahu_data.push_button);
         }
 
         k_sleep(K_MSEC(stream_freq * 1000));

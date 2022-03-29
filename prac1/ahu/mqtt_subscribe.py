@@ -27,8 +27,9 @@ def main():
     client.on_connect = on_connect
     client.on_disconnect = on_disconnect
     client.on_message = on_message
-    client.connect("localhost", 1885)
-    client.subscribe("1")
+    port = input('Port Number:')
+    client.connect('localhost', port=int(port))
+    client.subscribe("10")
     client.loop_forever()
 
 if __name__ == "__main__":
