@@ -140,8 +140,8 @@ int cmd_dc_write_percentage(const struct shell *shell, size_t argc,
 int cmd_sample_write_sec(const struct shell *shell, size_t argc, char **argv)
 {
 
-    uint16_t sec = atoi(argv[1]);
-    package_hci_message(REQUEST, SAMPLE, sec, 0, 0, 0);
+    stream_freq = atoi(argv[1]);
+    package_hci_message(REQUEST, SAMPLE, stream_freq, 0, 0, 0);
     scu_write();
     clear_tx();
 
@@ -154,6 +154,7 @@ int cmd_all_on(const struct shell *shell, size_t argc, char **argv)
     package_hci_message(REQUEST, ALL, 1, 0, 0, 0);
     scu_write();
     clear_tx();
+    all_active = true;
 
     return 0;
 }
@@ -164,6 +165,7 @@ int cmd_all_off(const struct shell *shell, size_t argc, char **argv)
     package_hci_message(REQUEST, ALL, 0, 0, 0, 0);
     scu_write();
     clear_tx();
+    all_active = false;
 
     return 0;
 }

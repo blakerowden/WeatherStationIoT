@@ -39,7 +39,6 @@ void button_pressed(const struct device *dev, struct gpio_callback *cb,
   {
     cmd_all_on(NULL, 0, NULL);
   }
-  all_active = !all_active;
 }
 
 void setup_pb(void)
