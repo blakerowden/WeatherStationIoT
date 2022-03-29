@@ -26,16 +26,11 @@
 #include <bluetooth/services/bas.h>
 #include <bluetooth/services/hrs.h>
 
-//power management
-#include <pm/pm.h>
-#include <pm/device.h>
-#include <pm/device_runtime.h>
-#include <pm/state.h>
-
 #include "scu_ble.h"
 #include "scu_sensors.h"
 #include "hci_driver.h"
 #include "ble_uuid.h"
+#include "scu_power_management.h"
 
 K_SEM_DEFINE(ble_in_sem, 0, 1);
 
@@ -410,13 +405,9 @@ void thread_data(void) {
      
      while(1) {
         
-        if (!k_sem_take(&ble_in_sem, K_FOREVER)) { //m_rec == 1
+        if (!k_sem_take(&ble_in_sem, K_FOREVER)) { 
 
-			pm_device_action_run(hts, PM_DEVICE_ACTION_RESUME);
-			pm_device_action_run(ccs, PM_DEVICE_ACTION_RESUME);
-			pm_device_action_run(lis, PM_DEVICE_ACTION_RESUME);
-			pm_device_action_run(lps, PM_DEVICE_ACTION_RESUME);
-			pm_device_action_run(rgb, PM_DEVICE_ACTION_RESUME);
+			device_resume(hts, ccs, lis, lps, rgb);
 
 			//printk("[RX]: 0x%X 0x%x 0x%X 0x%x 0x%X 0x%x\n", 
                 //tx_buff[0], tx_buff[1], tx_buff[2], tx_buff[3], tx_buff[4], tx_buff[5]);
@@ -553,20 +544,8 @@ void thread_data(void) {
 				rx_buff[5] = 0;
 			}
 			ahu_write();
-			//m_rec = 0;
-			pm_device_action_run(hts, PM_DEVICE_ACTION_SUSPEND);
-			pm_device_action_run(ccs, PM_DEVICE_ACTION_SUSPEND);
-			pm_device_action_run(lis, PM_DEVICE_ACTION_SUSPEND);
-			pm_device_action_run(lps, PM_DEVICE_ACTION_SUSPEND);
-			pm_device_action_run(rgb, PM_DEVICE_ACTION_SUSPEND);
-			/*
-			hts = scu_sensors_init(HTS211);
-	const struct device *ccs = scu_sensors_init(CCS811);
-	const struct device *lis = scu_sensors_init(LIS2DH);
-	const struct device *lps = scu_sensors_init(LPS22HB);
-	const struct device *rgb = get_rgb_led_device();
 
-*/
+			device_low_power(hts, ccs, lis, lps, rgb);
 		}
             
     }

@@ -29,11 +29,13 @@
 #include <device.h>
 #include <drivers/pwm.h>
 
-#include <pm/pm.h>
-#include <pm/device.h>
-#include <pm/device_runtime.h>
-#include <pm/state.h>
+//#include <pm/pm.h>
+//#include <pm/device.h>
+//#include <pm/device_runtime.h>
+//#include <pm/state.h>
 
+//set(DTC_OVERLAY_FILE pwm.overlay) //Cmakelists
+/*
 #if DT_NODE_HAS_STATUS(DT_ALIAS(pwmaudio), okay)
 #define PWM_DRIVER  DT_PWMS_CTLR(DT_ALIAS(pwmaudio))
 //#define PWM_CHANNEL DT_PWMS_CHANNEL(DT_ALIAS(pwmaudio))
@@ -41,6 +43,7 @@
 #else
 #error "Choose a supported PWM driver"
 #endif
+*/
 
 void main(void)
 {
