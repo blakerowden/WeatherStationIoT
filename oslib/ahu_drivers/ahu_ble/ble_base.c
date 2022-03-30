@@ -28,8 +28,8 @@
 #include "ble_uuid.h"
 #include "hci_driver.h"
 #include "led_driver.h"
-#include "shell_scu.h"
 #include "log_driver.h"
+#include "shell_scu.h"
 
 static void gatt_discovery(void);
 static void start_scan(void);

@@ -1,3 +1,4 @@
+from ctypes import sizeof
 import time
 import serial
 import re
@@ -9,8 +10,10 @@ from queue import *
 SHORTSLEEP = 1
 BAUDRATE = 115200
 
+
 def publish(client, topic, message):
     client.publish(topic, message)
+
 
 def on_log(client, userdata, level, buf):
     print("log: " + buf)
@@ -42,9 +45,10 @@ def get_input(ahu):
 
 def run_terminal(ahu, out_q):
     while(ahu.is_open):
-        line = ahu.readline().decode('utf-8')[:-1]
-        print(f'{line}')
-        out_q.put(line)
+        line = ahu.read(0xFFFF).decode('utf-8')[:-2].strip()
+        if line:
+            print(f'{line}')
+            out_q.put(line)
 
     ahu.close()
 
@@ -54,7 +58,6 @@ def mqtt_publish(ahu, client, in_q):
         while not in_q.empty():
             line = in_q.get()
             strip = re.search('{(.*?)}', line)
-            print(f"MQTT STRIP: {strip}")
             if strip is not None:
                 parse_JSON = "{ " + strip.group(1) + " }"
                 data = json.loads(parse_JSON)
@@ -76,7 +79,7 @@ def main():
     time.sleep(SHORTSLEEP)
 
     # Create a serial port object called ser for the serial port connection
-    ser = serial.Serial('/dev/ttyACM0', BAUDRATE)
+    ser = serial.Serial('/dev/ttyACM0', BAUDRATE, timeout=1)
     print(f"Connecting to Serial Port {ser.name}...")
     time.sleep(SHORTSLEEP)
 

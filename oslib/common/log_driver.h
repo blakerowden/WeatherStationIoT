@@ -1,14 +1,13 @@
 /**
  * @file log_driver.h
  * @author your name (you@domain.com)
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2022-03-29
- * 
+ *
  * @copyright Copyright (c) 2022
- * 
+ *
  */
-
 
 #ifndef __LOG_DRIVER_H__
 #define __LOG_DRIVER_H__

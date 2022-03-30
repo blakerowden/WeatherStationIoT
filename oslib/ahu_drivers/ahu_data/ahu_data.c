@@ -20,11 +20,11 @@
 
 #include <sys/byteorder.h>
 
+#include "ahu_data.h"
 #include "ble_base.h"
 #include "hci_driver.h"
 #include "led_driver.h"
 #include "log_driver.h"
-#include "ahu_data.h"
 
 typedef struct
 {
@@ -122,7 +122,8 @@ void print_scu_response(void)
         printk("The Z Acceleration is %i\n", ahu_data.Z);
         break;
     case 0x08:
-        printk("The RGB values are %i, %i, %i\n", ahu_data.rgb[0], ahu_data.rgb[1], ahu_data.rgb[2]);
+        printk("The RGB values are %i, %i, %i\n", ahu_data.rgb[0], ahu_data.rgb[1],
+               ahu_data.rgb[2]);
         break;
     case 0x09:
         printk("The buzzer is %i\n", ahu_data.buzzer);
@@ -176,9 +177,11 @@ void JSON_thread(void)
     {
         if (all_active)
         {
-            printk("{ \"1\" :%i, \"2\" :%i, \"3\" :%i, \"4\" :%i, \"5\" :%i, \"6\" :%i, \"7\" :%i, \"8\" :%i, \"9\" :%i, \"10\" :%i }\n",
-                   ahu_data.temp, ahu_data.humidity, ahu_data.air_pressure, ahu_data.VOC, ahu_data.X, ahu_data.Y, ahu_data.Z,
-                   ahu_data.rgb[0], ahu_data.buzzer, ahu_data.push_button);
+            printk("{ \"1\" :%i, \"2\" :%i, \"3\" :%i, \"4\" :%i, \"5\" :%i, \"6\" "
+                   ":%i, \"7\" :%i, \"8\" :%i, \"9\" :%i, \"10\" :%i }\n",
+                   ahu_data.temp, ahu_data.humidity, ahu_data.air_pressure,
+                   ahu_data.VOC, ahu_data.X, ahu_data.Y, ahu_data.Z, ahu_data.rgb[0],
+                   ahu_data.buzzer, ahu_data.push_button);
         }
 
         k_sleep(K_MSEC(stream_freq * 1000));

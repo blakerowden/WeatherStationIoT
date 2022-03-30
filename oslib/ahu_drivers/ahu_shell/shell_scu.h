@@ -1,12 +1,12 @@
 /**
  * @file shell_scu.h
  * @author your name (you@domain.com)
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2022-03-23
- * 
+ *
  * @copyright Copyright (c) 2022
- * 
+ *
  */
 #include <zephyr.h>
 #include <device.h>
@@ -42,4 +42,4 @@ int cmd_sample_write_sec(const struct shell *, size_t, char **);
 int cmd_all_on(const struct shell *, size_t, char **);
 int cmd_all_off(const struct shell *, size_t, char **);
 
-#endif //SHELL_SCU_H    
+#endif // SHELL_SCU_H

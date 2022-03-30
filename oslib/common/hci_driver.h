@@ -1,12 +1,12 @@
 /**
  * @file hci_driver.h
  * @author your name (you@domain.com)
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2022-03-25
- * 
+ *
  * @copyright Copyright (c) 2022
- * 
+ *
  */
 
 #ifndef HCI_DRIVER_H
@@ -25,7 +25,8 @@
 #define REQUEST 0x01
 #define RESPONSE 0x02
 
-typedef enum {
+typedef enum
+{
     NO_DEV,
     HTS221_T,
     HTS221_H,
@@ -54,5 +55,4 @@ int package_hci_message(uint8_t type, uint16_t data1, uint16_t data2, uint16_t d
 void clear_tx(void);
 void clear_rx(void);
 
-
-#endif //HCI_DRIVER_H
+#endif // HCI_DRIVER_H
