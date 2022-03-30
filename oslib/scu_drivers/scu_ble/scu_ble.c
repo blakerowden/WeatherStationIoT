@@ -456,7 +456,8 @@ void thread_data(void) {
 
 				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
 				rx_buff[1] = HTS221_T;
-				rx_buff[2] = temp_buff[0];
+				//rx_buff[2] = temp_buff[0];
+				rx_buff[2] = temp_buff[1];
 				rx_buff[3] = temp_buff[1];
 				rx_buff[4] = temp_buff[2];
 				rx_buff[5] = temp_buff[3];
@@ -466,7 +467,8 @@ void thread_data(void) {
 							
 				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
 				rx_buff[1] = HTS221_H;
-				rx_buff[2] = humid_buff[0];
+				//rx_buff[2] = humid_buff[0];
+				rx_buff[2] = humid_buff[1];
 				rx_buff[3] = humid_buff[1];
 				rx_buff[4] = humid_buff[2];
 				rx_buff[5] = humid_buff[3];
@@ -476,7 +478,8 @@ void thread_data(void) {
 				
 				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
 				rx_buff[1] = LPS22_AP;
-				rx_buff[2] = press_buff[0];
+				//rx_buff[2] = press_buff[0];
+				rx_buff[2] = press_buff[1];
 				rx_buff[3] = press_buff[1];
 				rx_buff[4] = press_buff[2];
 				rx_buff[5] = press_buff[3];
@@ -486,7 +489,8 @@ void thread_data(void) {
 				
 				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
 				rx_buff[1] = CCS811_VOC;
-				rx_buff[2] = voc_buff[0];
+				//rx_buff[2] = voc_buff[0];
+				rx_buff[2] = voc_buff[1];
 				rx_buff[3] = voc_buff[1];
 				rx_buff[4] = voc_buff[2];
 				rx_buff[5] = voc_buff[3];
@@ -496,7 +500,8 @@ void thread_data(void) {
 				
 				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
 				rx_buff[1] = LIS2DH_X_ACC;
-				rx_buff[2] = acc_x_buff[0];
+				//rx_buff[2] = acc_x_buff[0];
+				rx_buff[2] = acc_x_buff[1];
 				rx_buff[3] = acc_x_buff[1];
 				rx_buff[4] = acc_x_buff[2];
 				rx_buff[5] = acc_x_buff[3];
@@ -506,7 +511,8 @@ void thread_data(void) {
 				
 				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
 				rx_buff[1] = LIS2DH_Y_ACC;
-				rx_buff[2] = acc_y_buff[0];
+				//rx_buff[2] = acc_y_buff[0];
+				rx_buff[2] = acc_y_buff[1];
 				rx_buff[3] = acc_y_buff[1];
 				rx_buff[4] = acc_y_buff[2];
 				rx_buff[5] = acc_y_buff[3];
@@ -516,7 +522,8 @@ void thread_data(void) {
 				
 				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
 				rx_buff[1] = LIS2DH_Z_ACC;
-				rx_buff[2] = acc_z_buff[0];
+				//rx_buff[2] = acc_z_buff[0];
+				rx_buff[2] = acc_z_buff[1];
 				rx_buff[3] = acc_z_buff[1];
 				rx_buff[4] = acc_z_buff[2];
 				rx_buff[5] = acc_z_buff[3];
@@ -618,7 +625,8 @@ void thread_continuous() {
 			if (continuous_sample) {
 			rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
 			rx_buff[1] = HTS221_T;
-			rx_buff[2] = temp_buff[0];
+			//rx_buff[2] = temp_buff[0];
+			rx_buff[2] = temp_buff[1];			
 			rx_buff[3] = temp_buff[1];
 			rx_buff[4] = temp_buff[2];
 			rx_buff[5] = temp_buff[3];
@@ -626,7 +634,8 @@ void thread_continuous() {
 			k_sleep(K_MSEC(35));
 			rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
 			rx_buff[1] = HTS221_H;
-			rx_buff[2] = humid_buff[0];
+			//rx_buff[2] = humid_buff[0];
+			rx_buff[2] = humid_buff[1];
 			rx_buff[3] = humid_buff[1];
 			rx_buff[4] = humid_buff[2];
 			rx_buff[5] = humid_buff[3];
@@ -634,7 +643,8 @@ void thread_continuous() {
 			k_sleep(K_MSEC(35));
 			rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
 			rx_buff[1] = LPS22_AP;
-			rx_buff[2] = press_buff[0];
+			//rx_buff[2] = press_buff[0];
+			rx_buff[2] = press_buff[1];
 			rx_buff[3] = press_buff[1];
 			rx_buff[4] = press_buff[2];
 			rx_buff[5] = press_buff[3];
@@ -642,7 +652,8 @@ void thread_continuous() {
 			k_sleep(K_MSEC(35));
 			rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
 			rx_buff[1] = CCS811_VOC;
-			rx_buff[2] = voc_buff[0];
+			//rx_buff[2] = voc_buff[0];
+			rx_buff[2] = voc_buff[1];
 			rx_buff[3] = voc_buff[1];
 			rx_buff[4] = voc_buff[2];
 			rx_buff[5] = voc_buff[3];
@@ -650,7 +661,8 @@ void thread_continuous() {
 			k_sleep(K_MSEC(35));
 			rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
 			rx_buff[1] = LIS2DH_X_ACC;
-			rx_buff[2] = acc_x_buff[0];
+			//rx_buff[2] = acc_x_buff[0];
+			rx_buff[2] = acc_x_buff[1];
 			rx_buff[3] = acc_x_buff[1];
 			rx_buff[4] = acc_x_buff[2];
 			rx_buff[5] = acc_x_buff[3];
@@ -658,7 +670,8 @@ void thread_continuous() {
 			k_sleep(K_MSEC(35));
 			rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
 			rx_buff[1] = LIS2DH_Y_ACC;
-			rx_buff[2] = acc_y_buff[0];
+			//rx_buff[2] = acc_y_buff[0];
+			rx_buff[2] = acc_y_buff[1];
 			rx_buff[3] = acc_y_buff[1];
 			rx_buff[4] = acc_y_buff[2];
 			rx_buff[5] = acc_y_buff[3];
@@ -666,7 +679,8 @@ void thread_continuous() {
 			k_sleep(K_MSEC(35));
 			rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
 			rx_buff[1] = LIS2DH_Z_ACC;
-			rx_buff[2] = acc_z_buff[0];
+			//rx_buff[2] = acc_z_buff[0];
+			rx_buff[2] = acc_z_buff[1];
 			rx_buff[3] = acc_z_buff[1];
 			rx_buff[4] = acc_z_buff[2];
 			rx_buff[5] = acc_z_buff[3];
