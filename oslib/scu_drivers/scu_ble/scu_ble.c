@@ -32,6 +32,8 @@
 #include "ble_uuid.h"
 #include "scu_power_management.h"
 
+#include <kernel.h>
+
 K_SEM_DEFINE(ble_in_sem, 0, 1);
 
 //Keeps Track of BLE connection within APP
@@ -39,6 +41,8 @@ bool ble_connected = false;
 static struct bt_conn *default_conn;
 static uint16_t rx_handle;
 static void start_scan(void);
+
+int continuous_sample = 0;
 
 /**
  * @brief Used to parse the GATT service and characteristic data.
@@ -394,6 +398,7 @@ void thread_bluetooth() {
 }
 
 void thread_data(void) {
+	/*
   const struct device *hts = scu_sensors_init(HTS211);
 	const struct device *ccs = scu_sensors_init(CCS811);
 	const struct device *lis = scu_sensors_init(LIS2DH);
@@ -402,89 +407,123 @@ void thread_data(void) {
 
 	scu_sensors_scan(hts, ccs, lis, lps);
 	scu_sensors_io_init();
+	*/
+
+	const struct device *rgb = get_rgb_led_device();
+		scu_sensors_io_init();
+
+	/*
+	int64_t time = 0;
+	int64_t sampling_time = 1000; //ms 1000 is min
+	int64_t duty_on_time = 500;
+	int cycle_sample_taken = 0;
+	int power_state = FULL_POWER;
+	*/
      
      while(1) {
-        
-        if (!k_sem_take(&ble_in_sem, K_FOREVER)) { 
 
-			device_resume(hts, ccs, lis, lps, rgb);
+		
+		//sample window
+		/*
+		if (time > k_uptime_get() + sampling_time) {
+			time = k_uptime_get();
+			cycle_sample_taken = 0;
+		}
+		*/
+		/*
+
+		//duty cycle on window
+		if (k_uptime_get() <= time + duty_on_time) {
+			power_state = FULL_POWER;
+			
+		} 
+		
+		if (power_state == FULL_POWER && k_uptime_get() > time + duty_on_time) {
+			power_state = LOW_POWER;
+			device_low_power(hts, ccs, lis, lps, rgb);
+		}
+		*/
+        
+        if (!k_sem_take(&ble_in_sem, K_FOREVER)) { //bluetooth command
+
+			//device_resume(hts, ccs, lis, lps, rgb);
+			//scu_sensors_scan(hts, ccs, lis, lps);
 
 			//printk("[RX]: 0x%X 0x%x 0x%X 0x%x 0x%X 0x%x\n", 
                 //tx_buff[0], tx_buff[1], tx_buff[2], tx_buff[3], tx_buff[4], tx_buff[5]);
 
 			if (tx_buff[1] == HTS221_T) {
 
-				scu_sensors_scan(hts, ccs, lis, lps);
 				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
 				rx_buff[1] = HTS221_T;
 				rx_buff[2] = temp_buff[0];
 				rx_buff[3] = temp_buff[1];
 				rx_buff[4] = temp_buff[2];
 				rx_buff[5] = temp_buff[3];
+				ahu_write();
 			}
 			if (tx_buff[1] == HTS221_H) {
-				
-				scu_sensors_scan(hts, ccs, lis, lps);
+							
 				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
 				rx_buff[1] = HTS221_H;
 				rx_buff[2] = humid_buff[0];
 				rx_buff[3] = humid_buff[1];
 				rx_buff[4] = humid_buff[2];
 				rx_buff[5] = humid_buff[3];
+				ahu_write();
 			}
 			if (tx_buff[1] == LPS22_AP) {
 				
-				scu_sensors_scan(hts, ccs, lis, lps);
 				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
 				rx_buff[1] = LPS22_AP;
 				rx_buff[2] = press_buff[0];
 				rx_buff[3] = press_buff[1];
 				rx_buff[4] = press_buff[2];
 				rx_buff[5] = press_buff[3];
+				ahu_write();
 			}
 			if (tx_buff[1] == CCS811_VOC) {
 				
-				scu_sensors_scan(hts, ccs, lis, lps);
 				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
 				rx_buff[1] = CCS811_VOC;
 				rx_buff[2] = voc_buff[0];
 				rx_buff[3] = voc_buff[1];
 				rx_buff[4] = voc_buff[2];
 				rx_buff[5] = voc_buff[3];
+				ahu_write();
 			}
 			if (tx_buff[1] == LIS2DH_X_ACC) {
 				
-				scu_sensors_scan(hts, ccs, lis, lps);
 				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
 				rx_buff[1] = LIS2DH_X_ACC;
 				rx_buff[2] = acc_x_buff[0];
 				rx_buff[3] = acc_x_buff[1];
 				rx_buff[4] = acc_x_buff[2];
 				rx_buff[5] = acc_x_buff[3];
+				ahu_write();
 			}
 			if (tx_buff[1] == LIS2DH_Y_ACC) {
 				
-				scu_sensors_scan(hts, ccs, lis, lps);
 				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
 				rx_buff[1] = LIS2DH_Y_ACC;
 				rx_buff[2] = acc_y_buff[0];
 				rx_buff[3] = acc_y_buff[1];
 				rx_buff[4] = acc_y_buff[2];
 				rx_buff[5] = acc_y_buff[3];
+				ahu_write();
 			}
 			if (tx_buff[1] == LIS2DH_Z_ACC) {
 				
-				scu_sensors_scan(hts, ccs, lis, lps);
 				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
 				rx_buff[1] = LIS2DH_Z_ACC;
 				rx_buff[2] = acc_z_buff[0];
 				rx_buff[3] = acc_z_buff[1];
 				rx_buff[4] = acc_z_buff[2];
 				rx_buff[5] = acc_z_buff[3];
+				ahu_write();
 			}
 			if (tx_buff[1] == RGB_LED) {
 				
-				scu_sensors_scan(hts, ccs, lis, lps);
 				set_rgb_led(rgb, tx_buff[2], tx_buff[3], tx_buff[4]);
 				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 7;
 				rx_buff[1] = RGB_LED;
@@ -492,62 +531,159 @@ void thread_data(void) {
 				rx_buff[3] = tx_buff[3];
 				rx_buff[4] = tx_buff[4];
 				rx_buff[5] = 0;
+				ahu_write();
 			}
 			if (tx_buff[1] == BUZ) {
 				
-				scu_sensors_scan(hts, ccs, lis, lps);
 				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 5;
 				rx_buff[1] = BUZ;
 				rx_buff[2] = tx_buff[2];
 				rx_buff[3] = 0;
 				rx_buff[4] = 0;
 				rx_buff[5] = 0;
+				ahu_write();
 			}
 			if (tx_buff[1] == PB) {
-				
-				scu_sensors_scan(hts, ccs, lis, lps);
+			
 				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 5;
 				rx_buff[1] = PB;
 				rx_buff[2] = scu_sensors_get_button_status();
 				rx_buff[3] = 0;
 				rx_buff[4] = 0;
 				rx_buff[5] = 0;
+				ahu_write();
 			}
 			if (tx_buff[1] == DC) { //duty cycle
 				
-				scu_sensors_scan(hts, ccs, lis, lps);
 				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 5;
 				rx_buff[1] = DC;
 				rx_buff[2] = tx_buff[2];
 				rx_buff[3] = 0;
 				rx_buff[4] = 0;
 				rx_buff[5] = 0;
+				ahu_write();
+				//duty_on_time = (int)(sampling_time*(tx_buff[2]/100.0));
 			}
 			if (tx_buff[1] == SAMPLE) {
-				scu_sensors_scan(hts, ccs, lis, lps);
+		
 				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 5;
 				rx_buff[1] = SAMPLE;
 				rx_buff[2] = tx_buff[2];
 				rx_buff[3] = 0;
 				rx_buff[4] = 0;
 				rx_buff[5] = 0;
+				ahu_write();
+				//sampling_time = tx_buff[2]*1000;
 				
 			}
 			if (tx_buff[1] == ALL) {
 				
-				scu_sensors_scan(hts, ccs, lis, lps);
 				rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 5;
 				rx_buff[1] = ALL;
 				rx_buff[2] = tx_buff[2];
 				rx_buff[3] = 0;
 				rx_buff[4] = 0;
 				rx_buff[5] = 0;
+				ahu_write();
+				if(tx_buff[2] == 0) {
+					continuous_sample = 0;
+					//k_thread_suspend(continuous_sample);
+				} else {
+					continuous_sample = 1;
+					//k_thread_resume(continuous_sample);
+				}
 			}
-			ahu_write();
-
-			device_low_power(hts, ccs, lis, lps, rgb);
+			clear_rx();
 		}
             
     }
+
+}
+
+void thread_continuous() {
+	//k_sleep(K_SECONDS(5));
+	const struct device *hts = scu_sensors_init(HTS211);
+	const struct device *ccs = scu_sensors_init(CCS811);
+	const struct device *lis = scu_sensors_init(LIS2DH);
+	const struct device *lps = scu_sensors_init(LPS22HB);
+
+	scu_sensors_scan(hts, ccs, lis, lps);
+	while(1) {
+		
+		//device_resume(hts, ccs, lis, lps, rgb);
+			scu_sensors_scan(hts, ccs, lis, lps);
+			k_sleep(K_SECONDS(2));
+
+			
+			if (continuous_sample) {
+			rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
+			rx_buff[1] = HTS221_T;
+			rx_buff[2] = temp_buff[0];
+			rx_buff[3] = temp_buff[1];
+			rx_buff[4] = temp_buff[2];
+			rx_buff[5] = temp_buff[3];
+			ahu_write();
+			k_sleep(K_MSEC(35));
+			rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
+			rx_buff[1] = HTS221_H;
+			rx_buff[2] = humid_buff[0];
+			rx_buff[3] = humid_buff[1];
+			rx_buff[4] = humid_buff[2];
+			rx_buff[5] = humid_buff[3];
+			ahu_write();
+			k_sleep(K_MSEC(35));
+			rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
+			rx_buff[1] = LPS22_AP;
+			rx_buff[2] = press_buff[0];
+			rx_buff[3] = press_buff[1];
+			rx_buff[4] = press_buff[2];
+			rx_buff[5] = press_buff[3];
+			ahu_write();
+			k_sleep(K_MSEC(35));
+			rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
+			rx_buff[1] = CCS811_VOC;
+			rx_buff[2] = voc_buff[0];
+			rx_buff[3] = voc_buff[1];
+			rx_buff[4] = voc_buff[2];
+			rx_buff[5] = voc_buff[3];
+			ahu_write();
+			k_sleep(K_MSEC(35));
+			rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
+			rx_buff[1] = LIS2DH_X_ACC;
+			rx_buff[2] = acc_x_buff[0];
+			rx_buff[3] = acc_x_buff[1];
+			rx_buff[4] = acc_x_buff[2];
+			rx_buff[5] = acc_x_buff[3];
+			ahu_write();
+			k_sleep(K_MSEC(35));
+			rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
+			rx_buff[1] = LIS2DH_Y_ACC;
+			rx_buff[2] = acc_y_buff[0];
+			rx_buff[3] = acc_y_buff[1];
+			rx_buff[4] = acc_y_buff[2];
+			rx_buff[5] = acc_y_buff[3];
+			ahu_write();
+			k_sleep(K_MSEC(35));
+			rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 9;
+			rx_buff[1] = LIS2DH_Z_ACC;
+			rx_buff[2] = acc_z_buff[0];
+			rx_buff[3] = acc_z_buff[1];
+			rx_buff[4] = acc_z_buff[2];
+			rx_buff[5] = acc_z_buff[3];
+			ahu_write();
+			k_sleep(K_MSEC(35));
+			rx_buff[0] = (PREAMBLE << 8) | (RESPONSE << 4) | 5;
+			rx_buff[1] = PB;
+			rx_buff[2] = scu_sensors_get_button_status();
+			rx_buff[3] = 0;
+			rx_buff[4] = 0;
+			rx_buff[5] = 0;
+			ahu_write();
+			k_sleep(K_MSEC(35));
+			}
+			
+			//cycle_sample_taken = 1;
+			//clear_rx();
+	}
 
 }

@@ -10,6 +10,9 @@
 #ifndef SCU_PM_H
 #define SCU_PM_H
 
+#define LOW_POWER 1
+#define FULL_POWER 2
+
 void device_resume(const struct device *dev1, 
 const struct device *dev2,
 const struct device *dev3,

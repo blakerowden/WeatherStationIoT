@@ -18,5 +18,6 @@
 
 void thread_data(void);
 void thread_bluetooth();
+void thread_continuous();
 
 #endif //SCU_BLE_H
