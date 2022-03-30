@@ -194,6 +194,9 @@ static void connected(struct bt_conn *conn, uint8_t err)
     {
         printk("Connection failed (err 0x%02x)\n", err);
         ble_connected = false;
+
+		start_scan();
+		return;
     }
     else
     {   
@@ -394,7 +397,7 @@ void thread_bluetooth() {
 
 	bt_gatt_cb_register(&gatt_callbacks);
 	bt_conn_auth_cb_register(&auth_cb_display);
-  //start_scan();
+	//start_scan();
 }
 
 void thread_data(void) {
