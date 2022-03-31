@@ -1,6 +1,6 @@
 /**
  * @file pb_driver.h
- * @author your name (you@domain.com)
+ * @author Blake Rowden (BlakeRowden@uqconnect.edu.au)
  * @brief
  * @version 0.1
  * @date 2022-03-29
@@ -13,7 +13,7 @@
 #define PB_DRIVER_H
 
 /**
- * @brief Set the up pb object
+ * @brief Set the up pb with interupts
  *
  */
 void setup_pb(void);

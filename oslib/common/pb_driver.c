@@ -1,8 +1,12 @@
-/*
- * Copyright (c) 2016 Open-RnD Sp. z o.o.
- * Copyright (c) 2020 Nordic Semiconductor ASA
+/**
+ * @file pb_driver.c
+ * @author Blake Rowden (b.rowden@uqconnect.edu.au)
+ * @brief
+ * @version 0.1
+ * @date 2022-03-31
  *
- * SPDX-License-Identifier: Apache-2.0
+ * @copyright Copyright (c) 2022
+ *
  */
 
 #include <device.h>

@@ -18,6 +18,11 @@
 #ifndef SHELL_LED_H
 #define SHELL_LED_H
 
+/**
+ * @brief Interput handler for the shell_led command
+ * 
+ * @return int 
+ */
 int cmd_led_control(const struct shell *, size_t, char **);
 
 #endif // SHELL_LED_H
