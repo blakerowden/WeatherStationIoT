@@ -29,61 +29,79 @@
 #include <device.h>
 #include <drivers/pwm.h>
 
-//#include <pm/pm.h>
-//#include <pm/device.h>
-//#include <pm/device_runtime.h>
-//#include <pm/state.h>
+#include <pm/pm.h>
+#include <pm/device.h>
+#include <pm/device_runtime.h>
+#include <pm/state.h>
 
-//set(DTC_OVERLAY_FILE pwm.overlay) //Cmakelists
-/*
-#if DT_NODE_HAS_STATUS(DT_ALIAS(pwmaudio), okay)
-#define PWM_DRIVER  DT_PWMS_CTLR(DT_ALIAS(pwmaudio))
-//#define PWM_CHANNEL DT_PWMS_CHANNEL(DT_ALIAS(pwmaudio))
-//#define PWM_FLAGS	DT_PWMS_FLAGS(DT_ALIAS(pwmaudio))
+#define PWM_BUZZ_NODE	DT_ALIAS(pwmaudio) 
+
+#if DT_NODE_HAS_STATUS(PWM_BUZZ_NODE, okay)
+#define PWM_CTLR	DT_PWMS_CTLR(PWM_BUZZ_NODE)
+#define PWM_CHANNEL	DT_PWMS_CHANNEL(PWM_BUZZ_NODE)
+#define PWM_FLAGS	DT_PWMS_FLAGS(PWM_BUZZ_NODE)
 #else
-#error "Choose a supported PWM driver"
+#error "Unsupported board: pwm-led0 devicetree alias is not defined"
+#define PWM_CTLR	DT_INVALID_NODE
+#define PWM_CHANNEL	0
+#define PWM_FLAGS	0
 #endif
-*/
+
+#define MIN_PERIOD_USEC	(USEC_PER_SEC / 128U)
+#define MAX_PERIOD_USEC	USEC_PER_SEC
 
 void main(void)
-{
-	
-	//struct device *pwm_dev;
-	//64_t cycles;
-	/*
-    pwm_dev = device_get_binding(PWM_DRIVER);
-    if (!pwm_dev) {
-       printk("Cannot find %s!\n", PWM_DRIVER);
-       return;
-    }  
-	//pwm_get_cycles_per_sec(pwm_dev, PWM_CHANNEL, &cycles);
-	*/
+{	
+	const struct device *pwm;
+	uint32_t max_period;
+	uint32_t period;
+	uint8_t dir = 0U;
+	int ret;
 
-	/*
-	pwm_dev = DEVICE_DT_GET(PWM_DRIVER);
-	if (!device_is_ready(pwm_dev)) {
-		printk("Error: PWM device %s is not ready\n", pwm_dev->name);
+	pwm = DEVICE_DT_GET(PWM_CTLR);
+	if (!device_is_ready(pwm)) {
+		printk("Error: PWM device %s is not ready\n", pwm->name);
 		return;
 	}
-	*/
+
+	printk("Calibrating for channel %d...\n", PWM_CHANNEL);
+	max_period = MAX_PERIOD_USEC;
+	while (pwm_pin_set_usec(pwm, PWM_CHANNEL,
+				max_period, max_period / 2U, PWM_FLAGS)) {
+		max_period /= 2U;
+		if (max_period < (4U * MIN_PERIOD_USEC)) {
+			printk("Error: PWM device "
+			       "does not support a period at least %u\n",
+			       4U * MIN_PERIOD_USEC);
+			return;
+		}
+	}
+
+	printk("Done calibrating; maximum/minimum periods %u/%u usec\n",
+	       max_period, MIN_PERIOD_USEC);
+
+	period = max_period;
+	
 
 	while (1) {
 		
-		/*
-		if (pwm_pin_set_usec(pwm_dev, PWM_CHANNEL, 1000*50, 1000*50 / 2U, PWM_FLAGS)) {
-			printk("pwm pin set fails\n");
-			//return;
+		ret = pwm_pin_set_usec(pwm, PWM_CHANNEL,
+				       period, period / 2U, PWM_FLAGS);
+		if (ret) {
+			printk("Error %d: failed to set pulse width\n", ret);
+			return;
 		}
 
-		k_sleep(K_SECONDS(1));
-		
-		if (pwm_pin_set_usec(pwm_dev, PWM_CHANNEL, 1000*50, 0, PWM_FLAGS)) {
-			printk("pwm off fails\n");
-			//return;
+		period = dir ? (period * 2U) : (period / 2U);
+		if (period > max_period) {
+			period = max_period / 2U;
+			dir = 0U;
+		} else if (period < MIN_PERIOD_USEC) {
+			period = MIN_PERIOD_USEC * 2U;
+			dir = 1U;
 		}
-		*/
 
-		//k_sleep(K_SECONDS(1));
+		k_sleep(K_SECONDS(4U));
 		
 	}
 }

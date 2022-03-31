@@ -103,6 +103,28 @@ void set_rgb_led(const struct device *dev_sx1509, int red, int green, int blue) 
 	sx1509b_led_intensity_pin_set(dev_sx1509, BLUE_LED, blue);
 }
 
+const struct device *get_pwm_device(void) { 
+
+	const struct device *dev = DEVICE_DT_GET_ANY(nordic_nrf_pwm); //-press
+
+
+	if (dev == NULL) {
+
+		return NULL;
+
+	}
+
+
+	if (!device_is_ready(dev)) {
+
+		return NULL;
+
+	}
+
+	return dev;
+
+}
+
 static const struct device *get_hts221_device(void) { 
 
 	const struct device *dev = DEVICE_DT_GET_ANY(st_hts221); //bosch_bme280
