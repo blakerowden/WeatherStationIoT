@@ -27,7 +27,7 @@
 #include "hci_driver.h"
 
 #include <device.h>
-#include <drivers/pwm.h>
+//#include <drivers/pwm.h>
 
 //#include <pm/pm.h>
 //#include <pm/device.h>

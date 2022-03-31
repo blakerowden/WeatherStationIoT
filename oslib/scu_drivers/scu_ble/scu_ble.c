@@ -43,6 +43,7 @@ static uint16_t rx_handle;
 static void start_scan(void);
 
 int continuous_sample = 0;
+int sample_time = 2;
 
 /**
  * @brief Used to parse the GATT service and characteristic data.
@@ -583,7 +584,7 @@ void thread_data(void) {
 				rx_buff[4] = 0;
 				rx_buff[5] = 0;
 				ahu_write();
-				//sampling_time = tx_buff[2]*1000;
+				sample_time = tx_buff[2];
 				
 			}
 			if (tx_buff[1] == ALL) {
@@ -620,9 +621,10 @@ void thread_continuous() {
 	scu_sensors_scan(hts, ccs, lis, lps);
 	while(1) {
 		
-		//device_resume(hts, ccs, lis, lps, rgb);
+		
 			scu_sensors_scan(hts, ccs, lis, lps);
-			k_sleep(K_SECONDS(2));
+			k_sleep(K_SECONDS(sample_time));
+			device_resume(hts, ccs, lis, lps, NULL);
 
 			
 			if (continuous_sample) {
@@ -697,6 +699,7 @@ void thread_continuous() {
 			rx_buff[5] = 0;
 			ahu_write();
 			k_sleep(K_MSEC(35));
+			device_low_power(hts, ccs, lis, lps, NULL);
 			}
 			
 			//cycle_sample_taken = 1;
