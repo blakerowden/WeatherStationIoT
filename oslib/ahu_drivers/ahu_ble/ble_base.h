@@ -1,12 +1,12 @@
 /**
  * @file ble_base.h
- * @author your name (you@domain.com)
- * @brief 
+ * @author Blake Rowden (b.rowden@uqconnect.edu.au)
+ * @brief
  * @version 0.1
  * @date 2022-03-29
- * 
+ *
  * @copyright Copyright (c) 2022
- * 
+ *
  */
 
 #ifndef BLE_BASE_H
@@ -29,10 +29,17 @@
 
 extern struct k_sem sem_data_arrived;
 
-// GATT CHARACTERISTIC VALUES
-
+/**
+ * @brief When enabled runs a thread that blinks the LED
+ * according to the BLE status
+ *
+ */
 void thread_ble_led(void);
 
+/**
+ * @brief Base thread to start the BLE stack
+ *
+ */
 void thread_ble_base(void);
 
 /**

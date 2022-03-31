@@ -1,6 +1,6 @@
 /**
  * @file shell_scu.c
- * @author your name (you@domain.com)
+ * @author Blake Rowden (b.rowden@uqconnect.edu.au)
  * @brief
  * @version 0.1
  * @date 2022-03-23
