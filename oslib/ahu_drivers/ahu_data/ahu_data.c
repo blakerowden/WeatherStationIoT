@@ -104,29 +104,29 @@ void print_scu_response(void)
         printk("The temperature is %i Degrees\n", ahu_data.temp);
         break;
     case 0x02:
-        printk("The humidity is %i\n", ahu_data.humidity);
+        printk("The humidity is %i Percent\n", ahu_data.humidity);
         break;
     case 0x03:
-        printk("The air pressure is %i\n", ahu_data.air_pressure);
+        printk("The air pressure is %i mmHg\n", ahu_data.air_pressure);
         break;
     case 0x04:
-        printk("The Volatile Organic Compounds is %i\n", ahu_data.VOC);
+        printk("The Volatile Organic Compounds are %i ppm\n", ahu_data.VOC);
         break;
     case 0x05:
-        printk("The X Acceleration is %i\n", ahu_data.X);
+        printk("The X Acceleration is %i N\n", ahu_data.X);
         break;
     case 0x06:
-        printk("The Y Acceleration is %i\n", ahu_data.Y);
+        printk("The Y Acceleration is %i N\n", ahu_data.Y);
         break;
     case 0x07:
-        printk("The Z Acceleration is %i\n", ahu_data.Z);
+        printk("The Z Acceleration is %i N\n", ahu_data.Z);
         break;
     case 0x08:
         printk("The RGB values are %i, %i, %i\n", ahu_data.rgb[0], ahu_data.rgb[1],
                ahu_data.rgb[2]);
         break;
     case 0x09:
-        printk("The buzzer is %i\n", ahu_data.buzzer);
+        printk("The buzzer is now set to %i Hz\n", ahu_data.buzzer);
         break;
     case 0x0A:
         if (ahu_data.push_button)
